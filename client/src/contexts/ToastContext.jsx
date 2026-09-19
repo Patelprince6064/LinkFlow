@@ -24,11 +24,11 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={toast}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2" role="status" aria-live="polite">
+      <div className="fixed bottom-4 left-4 right-4 z-50 flex flex-col gap-2 sm:left-auto sm:right-4 sm:max-w-sm" role="status" aria-live="polite">
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`animate-in slide-in-from-bottom-2 rounded-lg border px-4 py-3 text-sm font-medium shadow-lg ${
+            className={`animate-in slide-in-from-bottom-2 rounded-lg border px-4 py-3 text-sm font-medium shadow-lg overflow-safe ${
               t.type === "success"
                 ? "border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200"
                 : t.type === "error"

@@ -28,8 +28,8 @@ function VerifyEmail() {
   }, [searchParams, verifyEmail]);
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
-      <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6 text-center">
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-8">
+      <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 text-center sm:p-6">
         {status === "verifying" && (
           <div className="flex items-center justify-center gap-2">
             <svg className="h-5 w-5 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24">
@@ -47,7 +47,7 @@ function VerifyEmail() {
               </svg>
             </div>
             <h2 className="mt-4 text-lg font-bold text-foreground">Email Verified</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+            <p className="mt-2 text-sm text-muted-foreground overflow-safe">{message}</p>
             <Link
               to="/login"
               className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -64,7 +64,7 @@ function VerifyEmail() {
               </svg>
             </div>
             <h2 className="mt-4 text-lg font-bold text-foreground">Verification Failed</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+            <p className="mt-2 text-sm text-muted-foreground overflow-safe">{message}</p>
             <Link
               to="/login"
               className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"

@@ -62,23 +62,23 @@ function BioPreview({ profile }) {
   const theme = themeStyles[profile?.theme] || themeStyles["Minimal Light"];
 
   return (
-    <div className={`min-h-[500px] p-6 ${theme.wrapper}`}>
-      <div className="mx-auto max-w-sm space-y-6 text-center">
+    <div className={`min-h-[400px] p-4 sm:min-h-[500px] sm:p-6 ${theme.wrapper}`}>
+      <div className="mx-auto max-w-sm space-y-4 text-center sm:space-y-6">
         {profile?.avatar ? (
           <img
             src={profile.avatar}
             alt={`${profile.displayName}'s avatar`}
-            className="mx-auto h-24 w-24 rounded-full border-4 border-white/20 object-cover shadow-lg"
+            className="mx-auto h-20 w-20 rounded-full border-4 border-white/20 object-cover shadow-lg sm:h-24 sm:w-24"
           />
         ) : (
-          <div className={`mx-auto flex h-24 w-24 items-center justify-center rounded-full border-4 border-white/20 text-2xl font-bold shadow-lg ${theme.card} ${theme.name}`}>
+          <div className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full border-4 border-white/20 text-xl font-bold shadow-lg sm:h-24 sm:w-24 sm:text-2xl ${theme.card} ${theme.name}`}>
             {getInitials(profile?.displayName)}
           </div>
         )}
 
         <div>
-          <h2 className={`text-xl font-bold ${theme.name}`}>{profile?.displayName || "Your Name"}</h2>
-          {profile?.bio && <p className={`mt-2 text-sm ${theme.bio}`}>{profile.bio}</p>}
+          <h2 className={`text-lg font-bold ${theme.name} sm:text-xl`}>{profile?.displayName || "Your Name"}</h2>
+          {profile?.bio && <p className={`mt-2 text-sm ${theme.bio} overflow-safe`}>{profile.bio}</p>}
         </div>
 
         {profile?.socialLinks && profile.socialLinks.length > 0 && (
@@ -94,7 +94,7 @@ function BioPreview({ profile }) {
                   className={`flex items-center justify-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${theme.social}`}
                 >
                   <SocialIcon platform={link.platform} />
-                  {link.label || link.platform}
+                  <span className="overflow-safe">{link.label || link.platform}</span>
                 </a>
               ))}
           </div>

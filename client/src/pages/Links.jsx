@@ -43,9 +43,9 @@ function Links() {
   const pagination = data?.pagination || { page: 1, totalPages: 1, total: 0 };
 
   return (
-    <div>
+    <div className="pb-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Links</h1>
+        <h1 className="text-xl font-bold text-foreground sm:text-2xl">Links</h1>
         <button
           onClick={() => setShowCreate(true)}
           className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -55,7 +55,7 @@ function Links() {
       </div>
 
       <div className="mt-4">
-        <div className="relative max-w-sm">
+        <div className="relative w-full sm:max-w-sm">
           <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
@@ -70,9 +70,9 @@ function Links() {
       </div>
 
       {isLoading && (
-        <div className="mt-8 space-y-3">
+        <div className="mt-6 space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-lg border border-border bg-card" />
+            <div key={i} className="h-20 animate-pulse rounded-lg border border-border bg-card sm:h-16" />
           ))}
         </div>
       )}
@@ -224,15 +224,15 @@ function Links() {
           <div className="space-y-3 lg:hidden">
             {links.map((link) => (
               <div key={link.id} className="rounded-lg border border-border bg-card p-4">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <p className="font-mono text-sm font-medium text-foreground">/{link.shortCode}</p>
-                    <p className="mt-1 truncate text-xs text-muted-foreground" title={link.destinationUrl}>
+                    <p className="mt-1 text-xs text-muted-foreground overflow-safe line-clamp-2" title={link.destinationUrl}>
                       {link.destinationUrl}
                     </p>
                   </div>
                   <span
-                    className={`ml-2 inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
                       link.isActive
                         ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                         : "bg-muted text-muted-foreground"
@@ -247,16 +247,16 @@ function Links() {
                     <span>{new Date(link.createdAt).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => handleCopy(link.shortUrl)} className="rounded p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground" title="Copy">
+                    <button onClick={() => handleCopy(link.shortUrl)} className="rounded p-2 text-muted-foreground hover:bg-accent hover:text-foreground touch-target" title="Copy" aria-label="Copy short link">
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
                     </button>
-                    <button onClick={() => setQrLink(link)} className="rounded p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground" title="QR">
+                    <button onClick={() => setQrLink(link)} className="rounded p-2 text-muted-foreground hover:bg-accent hover:text-foreground touch-target" title="QR" aria-label="Show QR code">
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                     </button>
-                    <button onClick={() => setEditLink(link)} className="rounded p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground" title="Edit">
+                    <button onClick={() => setEditLink(link)} className="rounded p-2 text-muted-foreground hover:bg-accent hover:text-foreground touch-target" title="Edit" aria-label="Edit link">
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
-                    <button onClick={() => setDeleteConfirm(link)} className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive-foreground" title="Delete">
+                    <button onClick={() => setDeleteConfirm(link)} className="rounded p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive-foreground touch-target" title="Delete" aria-label="Delete link">
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                   </div>
@@ -268,13 +268,16 @@ function Links() {
       )}
 
       {pagination.totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-2">
+        <div className="mt-4 flex items-center justify-between gap-2 sm:justify-center">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 transition-colors"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 transition-colors touch-target"
           >
-            Previous
+            <svg className="h-4 w-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="hidden sm:inline">Previous</span>
           </button>
           <span className="text-sm text-muted-foreground">
             Page {pagination.page} of {pagination.totalPages}
@@ -282,9 +285,12 @@ function Links() {
           <button
             onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
             disabled={page >= pagination.totalPages}
-            className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 transition-colors"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 transition-colors touch-target"
           >
-            Next
+            <span className="hidden sm:inline">Next</span>
+            <svg className="h-4 w-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       )}
@@ -368,10 +374,10 @@ function CreateLinkModal({ onClose, onSubmit, isLoading, error }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-6">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-4 sm:p-6">
         <h2 className="text-lg font-bold text-foreground">Create Short Link</h2>
         {error && (
-          <div className="mt-2 rounded-md border border-destructive/50 bg-destructive/10 p-2 text-sm text-destructive-foreground">
+          <div className="mt-2 rounded-md border border-destructive/50 bg-destructive/10 p-2 text-sm text-destructive-foreground overflow-safe">
             {error}
           </div>
         )}
@@ -404,7 +410,7 @@ function CreateLinkModal({ onClose, onSubmit, isLoading, error }) {
             />
             <p className="mt-1 text-xs text-muted-foreground">3-20 characters: letters, numbers, hyphens, underscores</p>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={onClose}
@@ -444,10 +450,10 @@ function EditLinkModal({ link, onClose, onSubmit, isLoading, error }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-6">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-4 sm:p-6">
         <h2 className="text-lg font-bold text-foreground">Edit Link</h2>
         {error && (
-          <div className="mt-2 rounded-md border border-destructive/50 bg-destructive/10 p-2 text-sm text-destructive-foreground">
+          <div className="mt-2 rounded-md border border-destructive/50 bg-destructive/10 p-2 text-sm text-destructive-foreground overflow-safe">
             {error}
           </div>
         )}
@@ -460,7 +466,7 @@ function EditLinkModal({ link, onClose, onSubmit, isLoading, error }) {
               required
               value={form.destinationUrl}
               onChange={(e) => setForm({ ...form, destinationUrl: e.target.value })}
-              className="mt-1 block h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="mt-1 block h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring overflow-safe"
             />
           </div>
           <div>
@@ -484,7 +490,7 @@ function EditLinkModal({ link, onClose, onSubmit, isLoading, error }) {
             />
             <label htmlFor="edit-active" className="text-sm text-foreground">Active</label>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={onClose}
@@ -509,12 +515,12 @@ function EditLinkModal({ link, onClose, onSubmit, isLoading, error }) {
 function DeleteConfirmModal({ link, onClose, onConfirm, isLoading }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6">
+      <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 sm:p-6">
         <h2 className="text-lg font-bold text-foreground">Delete Link</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground overflow-safe">
           Are you sure you want to delete <strong className="font-mono">/{link.shortCode}</strong>? This action cannot be undone.
         </p>
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button
             onClick={onClose}
             className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium text-foreground hover:bg-accent transition-colors"

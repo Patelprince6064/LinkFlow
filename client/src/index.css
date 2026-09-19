@@ -123,12 +123,49 @@
     background-color: var(--background);
     color: var(--foreground);
     @apply bg-background text-foreground;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
   }
   * {
     @apply border-border outline-ring/50;
   }
   code, kbd, samp, pre {
     font-family: var(--font-mono);
+  }
+  
+  /* Mobile-specific utilities */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  
+  /* Prevent text overflow on mobile */
+  .overflow-safe {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  
+  /* Responsive text truncation */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 

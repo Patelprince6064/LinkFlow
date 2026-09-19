@@ -30,18 +30,18 @@ function Login() {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
+          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Welcome back</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Log in to your LinkHub account
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4" noValidate>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-8" noValidate>
           {error && (
-            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground" role="alert">
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground overflow-safe" role="alert">
               {error}
             </div>
           )}

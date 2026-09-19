@@ -51,10 +51,10 @@ function Register() {
 
   if (success) {
     return (
-      <div className="flex min-h-[80vh] items-center justify-center px-4">
-        <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6 text-center">
+      <div className="flex min-h-[80vh] items-center justify-center px-4 py-8">
+        <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 text-center sm:p-6">
           <h2 className="text-lg font-bold text-foreground">Check your email</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{success}</p>
+          <p className="mt-2 text-sm text-muted-foreground overflow-safe">{success}</p>
           <Link
             to="/login"
             className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -67,18 +67,18 @@ function Register() {
   }
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
+          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Create your account</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Start creating short links today
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4" noValidate>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-8" noValidate>
           {error && (
-            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground" role="alert">
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground overflow-safe" role="alert">
               {error}
             </div>
           )}

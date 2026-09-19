@@ -6,12 +6,12 @@ function PublicLayout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="border-b border-border bg-card safe-top">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:h-16 sm:px-6 lg:px-8">
           <a href="/" className="text-lg font-bold text-foreground">
             LinkHub
           </a>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-2 sm:gap-4">
             {isAuthenticated ? (
               <>
                 <Link
@@ -22,7 +22,7 @@ function PublicLayout() {
                 </Link>
                 <button
                   onClick={logout}
-                  className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors sm:px-4"
                 >
                   Log out
                 </button>
@@ -37,7 +37,7 @@ function PublicLayout() {
                 </Link>
                 <Link
                   to="/register"
-                  className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors sm:px-4"
                 >
                   Get started
                 </Link>
@@ -49,9 +49,9 @@ function PublicLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="border-t border-border bg-card py-6">
+      <footer className="border-t border-border bg-card py-4 safe-bottom sm:py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-xs text-muted-foreground sm:text-sm">
             &copy; {new Date().getFullYear()} LinkHub. All rights reserved.
           </p>
         </div>

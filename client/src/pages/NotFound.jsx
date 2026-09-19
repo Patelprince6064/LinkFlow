@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 
 function NotFound() {
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-      <p className="text-6xl font-bold text-foreground">404</p>
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-8 text-center">
+      <p className="text-5xl font-bold text-foreground sm:text-6xl">404</p>
       <h1 className="mt-4 text-lg font-medium text-foreground">Page not found</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
+      <p className="mt-2 text-sm text-muted-foreground overflow-safe">
         The page you&apos;re looking for doesn&apos;t exist or has been moved.
       </p>
       <Link

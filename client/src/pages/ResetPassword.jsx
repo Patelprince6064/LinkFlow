@@ -15,10 +15,10 @@ function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="flex min-h-[80vh] items-center justify-center px-4">
-        <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6 text-center">
+      <div className="flex min-h-[80vh] items-center justify-center px-4 py-8">
+        <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 text-center sm:p-6">
           <h2 className="text-lg font-bold text-foreground">Invalid Reset Link</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground overflow-safe">
             No reset token provided. Please request a new password reset.
           </p>
           <Link
@@ -67,26 +67,26 @@ function ResetPassword() {
 
   if (success) {
     return (
-      <div className="flex min-h-[80vh] items-center justify-center px-4">
-        <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6 text-center">
+      <div className="flex min-h-[80vh] items-center justify-center px-4 py-8">
+        <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 text-center sm:p-6">
           <h2 className="text-lg font-bold text-foreground">Password Reset</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{success}</p>
+          <p className="mt-2 text-sm text-muted-foreground overflow-safe">{success}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4">
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">Reset your password</h1>
+          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Reset your password</h1>
           <p className="mt-2 text-sm text-muted-foreground">Enter your new password below.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4" noValidate>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-8" noValidate>
           {error && (
-            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground" role="alert">
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground overflow-safe" role="alert">
               {error}
             </div>
           )}

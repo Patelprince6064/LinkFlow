@@ -16,47 +16,38 @@ function Dashboard() {
   const isLoading = linksData.isLoading || analytics.isLoading;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+    <div className="pb-4">
+      <h1 className="text-xl font-bold text-foreground sm:text-2xl">Dashboard</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Welcome back, {user?.name || "User"}.
       </p>
 
       {isLoading ? (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <StatCardSkeleton key={i} />
           ))}
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Total Links</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{totalLinks}</p>
-          </div>
-          <div className="rounded-lg border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Total Clicks</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{totalClicks}</p>
-          </div>
-          <div className="rounded-lg border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Active Links</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{activeLinks}</p>
-          </div>
-          <div className="rounded-lg border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Top Link</p>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+          <StatCard title="Total Links" value={totalLinks} />
+          <StatCard title="Total Clicks" value={totalClicks} />
+          <StatCard title="Active Links" value={activeLinks} />
+          <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
+            <p className="text-xs text-muted-foreground sm:text-sm">Top Link</p>
             {topLink ? (
               <>
-                <p className="mt-1 text-2xl font-bold font-mono text-foreground">/{topLink.shortCode}</p>
+                <p className="mt-1 text-lg font-bold font-mono text-foreground truncate sm:text-2xl">/{topLink.shortCode}</p>
                 <p className="text-xs text-muted-foreground">{topLink.clicks} clicks</p>
               </>
             ) : (
-              <p className="mt-1 text-2xl font-bold text-foreground">&mdash;</p>
+              <p className="mt-1 text-lg font-bold text-foreground sm:text-2xl">&mdash;</p>
             )}
           </div>
         </div>
       )}
 
-      <div className="mt-6 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-3">
         <Link
           to="/dashboard/links"
           className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -77,16 +68,16 @@ function Dashboard() {
         </Link>
       </div>
 
-      <div className="mt-8 rounded-lg border border-border bg-card p-6">
+      <div className="mt-6 rounded-lg border border-border bg-card p-4 sm:mt-8 sm:p-6">
         <h2 className="text-sm font-medium text-foreground">Account Details</h2>
-        <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
+        <dl className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 sm:gap-4">
           <div>
             <dt className="text-muted-foreground">Name</dt>
-            <dd className="mt-0.5 text-foreground">{user?.name}</dd>
+            <dd className="mt-0.5 text-foreground overflow-safe">{user?.name}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Email</dt>
-            <dd className="mt-0.5 text-foreground">{user?.email}</dd>
+            <dd className="mt-0.5 text-foreground overflow-safe">{user?.email}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Role</dt>
@@ -98,6 +89,16 @@ function Dashboard() {
           </div>
         </dl>
       </div>
+    </div>
+  );
+}
+
+function StatCard({ title, value, subtitle }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
+      <p className="text-xs text-muted-foreground sm:text-sm">{title}</p>
+      <p className="mt-1 text-lg font-bold text-foreground sm:text-2xl">{value}</p>
+      {subtitle && <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }

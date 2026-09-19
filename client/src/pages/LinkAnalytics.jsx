@@ -67,22 +67,22 @@ function LinkAnalytics() {
   const data = analytics.data;
 
   return (
-    <div>
+    <div className="pb-4">
       <Link to="/dashboard/analytics" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
         &larr; Analytics
       </Link>
 
       <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-foreground font-mono">/{data.link.shortCode}</h1>
-          <p className="mt-1 text-sm text-muted-foreground truncate max-w-md">{data.link.destinationUrl}</p>
+          <h1 className="text-xl font-bold text-foreground font-mono sm:text-2xl">/{data.link.shortCode}</h1>
+          <p className="mt-1 text-sm text-muted-foreground overflow-safe line-clamp-2">{data.link.destinationUrl}</p>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 shrink-0">
           {[7, 30, 90].map((days) => (
             <button
               key={days}
               onClick={() => setDatePreset(days)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors touch-target ${
                 datePreset === days
                   ? "bg-primary text-primary-foreground"
                   : "border border-border text-foreground hover:bg-accent"
@@ -94,34 +94,35 @@ function LinkAnalytics() {
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Total Clicks</p>
-          <p className="mt-1 text-2xl font-bold text-foreground">{data.totalClicks}</p>
+      <div className="mt-4 grid grid-cols-3 gap-3 sm:mt-6 sm:gap-4">
+        <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
+          <p className="text-xs text-muted-foreground sm:text-sm">Total Clicks</p>
+          <p className="mt-1 text-lg font-bold text-foreground sm:text-2xl">{data.totalClicks}</p>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Unique Referrers</p>
-          <p className="mt-1 text-2xl font-bold text-foreground">{data.referrers.length}</p>
+        <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
+          <p className="text-xs text-muted-foreground sm:text-sm">Unique Referrers</p>
+          <p className="mt-1 text-lg font-bold text-foreground sm:text-2xl">{data.referrers.length}</p>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Short Code</p>
-          <p className="mt-1 text-2xl font-bold text-foreground font-mono">/{data.link.shortCode}</p>
+        <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
+          <p className="text-xs text-muted-foreground sm:text-sm">Short Code</p>
+          <p className="mt-1 text-lg font-bold text-foreground font-mono sm:text-2xl">/{data.link.shortCode}</p>
         </div>
       </div>
 
-      <div className="mt-6 rounded-lg border border-border bg-card p-4">
+      <div className="mt-4 rounded-lg border border-border bg-card p-4 sm:mt-6">
         <h2 className="text-sm font-medium text-foreground">Clicks Over Time</h2>
         {data.clicksOverTime.some((d) => d.clicks > 0) ? (
-          <div className="mt-4 h-64">
+          <div className="mt-4 h-48 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data.clicksOverTime}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                  tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
                   tickFormatter={(v) => v.slice(5)}
+                  interval="preserveStartEnd"
                 />
-                <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} allowDecimals={false} />
+                <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} allowDecimals={false} width={30} />
                 <Tooltip
                   contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "6px", fontSize: "12px" }}
                 />
@@ -137,12 +138,12 @@ function LinkAnalytics() {
         )}
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 lg:grid-cols-2">
         <div className="rounded-lg border border-border bg-card p-4">
           <h2 className="text-sm font-medium text-foreground">Device Distribution</h2>
           {data.devices.some((d) => d.clicks > 0) ? (
             <div className="mt-4">
-              <div className="h-48">
+              <div className="h-40 sm:h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -151,8 +152,8 @@ function LinkAnalytics() {
                       nameKey="deviceType"
                       cx="50%"
                       cy="50%"
-                      outerRadius={70}
-                      innerRadius={35}
+                      outerRadius={60}
+                      innerRadius={30}
                     >
                       {data.devices
                         .filter((d) => d.clicks > 0)
@@ -192,8 +193,8 @@ function LinkAnalytics() {
             <div className="mt-4 space-y-2">
               {data.referrers.map((r, i) => (
                 <div key={i} className="flex items-center justify-between text-sm">
-                  <span className="truncate max-w-[200px] text-foreground">{r.referrer}</span>
-                  <span className="text-muted-foreground">{r.clicks}</span>
+                  <span className="min-w-0 flex-1 truncate text-foreground overflow-safe">{r.referrer}</span>
+                  <span className="ml-2 shrink-0 text-muted-foreground">{r.clicks}</span>
                 </div>
               ))}
             </div>

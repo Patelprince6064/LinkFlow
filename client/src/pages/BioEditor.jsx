@@ -161,11 +161,11 @@ function BioEditor() {
   const error = createMutation.error?.response?.data?.message || updateMutation.error?.response?.data?.message;
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
+    <div className="pb-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Link-in-Bio</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Link-in-Bio</h1>
+          <p className="mt-1 text-sm text-muted-foreground overflow-safe">
             Manage your public bio profile at{" "}
             <span className="font-mono text-foreground">/bio/{form.username || "..."}</span>
           </p>
@@ -173,7 +173,7 @@ function BioEditor() {
         {profile && (
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="rounded-md border border-destructive/50 px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
+            className="self-start rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
           >
             Delete profile
           </button>
@@ -181,13 +181,13 @@ function BioEditor() {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground">
+        <div className="mt-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground overflow-safe">
           {error}
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="space-y-6">
+      <div className="mt-4 flex flex-col gap-6 sm:mt-6 lg:grid lg:grid-cols-2">
+        <div className="space-y-4 sm:space-y-6">
           <Section title="Settings">
             <Field label="Username">
               <input
@@ -222,16 +222,16 @@ function BioEditor() {
                 value={form.avatar}
                 onChange={(e) => setForm({ ...form, avatar: e.target.value })}
                 placeholder="https://example.com/avatar.jpg"
-                className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring overflow-safe"
               />
             </Field>
             <Field label="Theme">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {THEMES.map((t) => (
                   <button
                     key={t}
                     onClick={() => setForm({ ...form, theme: t })}
-                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    className={`rounded-md px-3 py-2 text-sm font-medium transition-colors touch-target ${
                       form.theme === t
                         ? "bg-primary text-primary-foreground"
                         : "border border-border text-foreground hover:bg-accent"
@@ -247,13 +247,13 @@ function BioEditor() {
           <Section title="Social Links">
             <div className="space-y-2">
               {form.socialLinks.map((link, i) => (
-                <div key={i} className="flex items-center gap-2 rounded-md border border-border bg-background p-2">
+                <div key={i} className="rounded-md border border-border bg-background p-2">
                   {editingIndex === i ? (
-                    <>
+                    <div className="space-y-2">
                       <select
                         value={editPlatform}
                         onChange={(e) => setEditPlatform(e.target.value)}
-                        className="rounded border border-input bg-background px-2 py-1 text-sm"
+                        className="w-full rounded border border-input bg-background px-2 py-2 text-sm"
                       >
                         {PLATFORMS.map((p) => (
                           <option key={p}>{p}</option>
@@ -263,70 +263,78 @@ function BioEditor() {
                         type="url"
                         value={editUrl}
                         onChange={(e) => setEditUrl(e.target.value)}
-                        className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
+                        className="w-full rounded border border-input bg-background px-2 py-2 text-sm overflow-safe"
                       />
-                      <button onClick={handleSaveEdit} className="rounded px-2 py-1 text-xs text-foreground hover:bg-accent">Save</button>
-                      <button onClick={() => setEditingIndex(-1)} className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-accent">Cancel</button>
-                    </>
+                      <div className="flex gap-2">
+                        <button onClick={handleSaveEdit} className="flex-1 rounded px-2 py-2 text-sm font-medium text-foreground bg-accent hover:bg-accent/80">Save</button>
+                        <button onClick={() => setEditingIndex(-1)} className="flex-1 rounded px-2 py-2 text-sm font-medium text-muted-foreground hover:bg-accent">Cancel</button>
+                      </div>
+                    </div>
                   ) : (
-                    <>
-                      <span className="text-sm font-medium text-foreground w-24">{link.platform}</span>
-                      <span className="flex-1 truncate text-sm text-muted-foreground">{link.url}</span>
-                      <button onClick={() => handleMoveSocial(i, -1)} disabled={i === 0} className="rounded p-1 text-muted-foreground hover:bg-accent disabled:opacity-30">
-                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
-                      </button>
-                      <button onClick={() => handleMoveSocial(i, 1)} disabled={i === form.socialLinks.length - 1} className="rounded p-1 text-muted-foreground hover:bg-accent disabled:opacity-30">
-                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                      </button>
-                      <button onClick={() => handleStartEdit(i)} className="rounded p-1 text-muted-foreground hover:bg-accent">
-                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                      </button>
-                      <button onClick={() => handleDeleteSocial(i)} className="rounded p-1 text-destructive hover:bg-destructive/10">
-                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                      </button>
-                    </>
+                    <div className="flex items-center gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground">{link.platform}</p>
+                        <p className="truncate text-xs text-muted-foreground overflow-safe">{link.url}</p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => handleMoveSocial(i, -1)} disabled={i === 0} className="rounded p-1.5 text-muted-foreground hover:bg-accent disabled:opacity-30 touch-target" aria-label="Move up">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+                        </button>
+                        <button onClick={() => handleMoveSocial(i, 1)} disabled={i === form.socialLinks.length - 1} className="rounded p-1.5 text-muted-foreground hover:bg-accent disabled:opacity-30 touch-target" aria-label="Move down">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <button onClick={() => handleStartEdit(i)} className="rounded p-1.5 text-muted-foreground hover:bg-accent touch-target" aria-label="Edit social link">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+                        <button onClick={() => handleDeleteSocial(i)} className="rounded p-1.5 text-destructive hover:bg-destructive/10 touch-target" aria-label="Delete social link">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
             </div>
 
-            <div className="mt-3 flex items-end gap-2">
-              <div className="flex-1">
-                <label className="block text-xs font-medium text-muted-foreground mb-1">Platform</label>
-                <select
-                  value={newPlatform}
-                  onChange={(e) => setNewPlatform(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            <div className="mt-3 space-y-2">
+              <div className="space-y-2 sm:flex sm:items-end sm:gap-2 sm:space-y-0">
+                <div className="w-full sm:w-auto sm:flex-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">Platform</label>
+                  <select
+                    value={newPlatform}
+                    onChange={(e) => setNewPlatform(e.target.value)}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    {PLATFORMS.map((p) => (
+                      <option key={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="w-full sm:w-auto sm:flex-[2]">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">URL</label>
+                  <input
+                    type="url"
+                    value={newUrl}
+                    onChange={(e) => setNewUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground overflow-safe"
+                    onKeyDown={(e) => e.key === "Enter" && handleAddSocial()}
+                  />
+                </div>
+                <button
+                  onClick={handleAddSocial}
+                  className="w-full rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent sm:w-auto"
                 >
-                  {PLATFORMS.map((p) => (
-                    <option key={p}>{p}</option>
-                  ))}
-                </select>
+                  + Add
+                </button>
               </div>
-              <div className="flex-[2]">
-                <label className="block text-xs font-medium text-muted-foreground mb-1">URL</label>
-                <input
-                  type="url"
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground"
-                  onKeyDown={(e) => e.key === "Enter" && handleAddSocial()}
-                />
-              </div>
-              <button
-                onClick={handleAddSocial}
-                className="rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
-              >
-                + Add
-              </button>
             </div>
           </Section>
 
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
             {isPending ? "Saving..." : profile ? "Save Changes" : "Create Profile"}
           </button>
@@ -341,23 +349,23 @@ function BioEditor() {
       </div>
 
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 sm:p-6">
             <h2 className="text-lg font-bold text-foreground">Delete Profile</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground overflow-safe">
               Are you sure you want to delete your bio profile? This action cannot be undone.
             </p>
-            <div className="mt-6 flex justify-end gap-2">
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium text-foreground hover:bg-accent"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleteMutation.isPending}
-                className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
               >
                 {deleteMutation.isPending ? "Deleting..." : "Delete"}
               </button>

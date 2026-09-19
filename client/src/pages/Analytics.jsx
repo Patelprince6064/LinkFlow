@@ -43,10 +43,10 @@ function Analytics() {
   };
 
   return (
-    <div>
+    <div className="pb-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Analytics</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Track how your short links are performing.
           </p>
@@ -57,7 +57,7 @@ function Analytics() {
               <button
                 key={preset.days}
                 onClick={() => setDatePreset(preset.days)}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors touch-target ${
                   datePreset === preset.days
                     ? "bg-primary text-primary-foreground"
                     : "border border-border text-foreground hover:bg-accent"
@@ -69,7 +69,7 @@ function Analytics() {
           </div>
           <button
             onClick={refreshAll}
-            className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm text-foreground hover:bg-accent transition-colors"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-3 text-sm text-foreground hover:bg-accent transition-colors touch-target"
           >
             Refresh
           </button>
@@ -77,15 +77,15 @@ function Analytics() {
       </div>
 
       {isLoading ? (
-        <div className="mt-6 space-y-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 space-y-4 sm:mt-6 sm:space-y-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => <StatCardSkeleton key={i} />)}
           </div>
           <ChartSkeleton />
         </div>
       ) : (
         <>
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
             <StatCard title="Total Clicks" value={overview.data?.totalClicks ?? 0} />
             <StatCard title="Total Links" value={overview.data?.totalLinks ?? 0} />
             <StatCard title="Active Links" value={overview.data?.activeLinks ?? 0} />
@@ -96,20 +96,21 @@ function Analytics() {
             />
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 lg:grid-cols-3">
             <div className="rounded-lg border border-border bg-card p-4 lg:col-span-2">
               <h2 className="text-sm font-medium text-foreground">Clicks Over Time</h2>
               {clicksOverTime.data && clicksOverTime.data.some((d) => d.clicks > 0) ? (
-                <div className="mt-4 h-64">
+                <div className="mt-4 h-48 sm:h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={clicksOverTime.data}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis
                         dataKey="date"
-                        tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                        tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
                         tickFormatter={(v) => v.slice(5)}
+                        interval="preserveStartEnd"
                       />
-                      <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} allowDecimals={false} />
+                      <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} allowDecimals={false} width={30} />
                       <Tooltip
                         contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "6px", fontSize: "12px" }}
                       />
@@ -129,7 +130,7 @@ function Analytics() {
               <h2 className="text-sm font-medium text-foreground">Device Distribution</h2>
               {devices.data && devices.data.some((d) => d.clicks > 0) ? (
                 <div className="mt-4">
-                  <div className="h-48">
+                  <div className="h-40 sm:h-48">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -138,8 +139,8 @@ function Analytics() {
                           nameKey="deviceType"
                           cx="50%"
                           cy="50%"
-                          outerRadius={70}
-                          innerRadius={35}
+                          outerRadius={60}
+                          innerRadius={30}
                         >
                           {devices.data
                             .filter((d) => d.clicks > 0)
@@ -174,15 +175,15 @@ function Analytics() {
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 lg:grid-cols-2">
             <div className="rounded-lg border border-border bg-card p-4">
               <h2 className="text-sm font-medium text-foreground">Top Referrers</h2>
               {referrers.data && referrers.data.length > 0 ? (
                 <div className="mt-4 space-y-2">
                   {referrers.data.map((r, i) => (
                     <div key={i} className="flex items-center justify-between text-sm">
-                      <span className="truncate max-w-[200px] text-foreground">{r.referrer}</span>
-                      <span className="text-muted-foreground">{r.clicks}</span>
+                      <span className="min-w-0 flex-1 truncate text-foreground overflow-safe">{r.referrer}</span>
+                      <span className="ml-2 shrink-0 text-muted-foreground">{r.clicks}</span>
                     </div>
                   ))}
                 </div>
@@ -239,9 +240,9 @@ function Analytics() {
 
 function StatCard({ title, value, subtitle }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <p className="text-sm text-muted-foreground">{title}</p>
-      <p className="mt-1 text-2xl font-bold text-foreground">{value}</p>
+    <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
+      <p className="text-xs text-muted-foreground sm:text-sm">{title}</p>
+      <p className="mt-1 text-lg font-bold text-foreground sm:text-2xl overflow-safe">{value}</p>
       {subtitle && <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>}
     </div>
   );

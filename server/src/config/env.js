@@ -17,11 +17,17 @@ const env = {
   PUBLIC_BASE_URL: process.env.PUBLIC_BASE_URL || "http://localhost:5000",
 };
 
-const requiredEnvVars = ["MONGODB_URI"];
+const requiredInProduction = ["MONGODB_URI", "JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"];
 
-for (const key of requiredEnvVars) {
-  if (!env[key]) {
-    throw new Error(`Missing required environment variable: ${key}. Check your .env file.`);
+if (env.NODE_ENV === "production") {
+  for (const key of requiredInProduction) {
+    if (!env[key]) {
+      throw new Error(`Missing required production environment variable: ${key}`);
+    }
+  }
+} else {
+  if (!env.MONGODB_URI) {
+    throw new Error("Missing required environment variable: MONGODB_URI");
   }
 }
 

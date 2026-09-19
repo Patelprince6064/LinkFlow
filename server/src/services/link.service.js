@@ -4,6 +4,7 @@ import { generateShortCode, isValidSlug, MAX_RETRIES } from "../utils/shortCode.
 import { isReservedSlug } from "../utils/reservedSlugs.js";
 import { isValidDestinationUrl } from "../utils/urlValidation.js";
 import { buildShortUrl } from "../utils/shortUrl.js";
+import { sanitizeSearchInput } from "../utils/validation.js";
 
 const MAX_PAGE_LIMIT = 50;
 
@@ -79,8 +80,11 @@ export const getUserLinks = async ({ userId, page = 1, limit = 10, search, isAct
   const query = { user: userId };
 
   if (search) {
-    const regex = new RegExp(search, "i");
-    query.$or = [{ destinationUrl: regex }, { shortCode: regex }];
+    const sanitized = sanitizeSearchInput(search);
+    if (sanitized) {
+      const regex = new RegExp(sanitized, "i");
+      query.$or = [{ destinationUrl: regex }, { shortCode: regex }];
+    }
   }
 
   if (isActive !== undefined) {

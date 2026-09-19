@@ -1,8 +1,8 @@
-const notFound = (req, res, next) => {
-  const error = new Error(`Not Found - ${req.originalUrl}`);
-  error.statusCode = 404;
-  error.isOperational = true;
-  next(error);
+const notFound = (_req, res, _next) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
 };
 
 export default notFound;

@@ -13,6 +13,7 @@
     "test:auth": "node src/utils/testAuth.js",
     "test:analytics": "node src/__tests__/analytics.test.js",
     "test:bio": "node src/__tests__/bio.test.js",
+    "test:security": "node src/__tests__/security.test.js",
     "lint": "eslint src/"
   },
   "dependencies": {

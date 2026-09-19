@@ -4,6 +4,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import env from "./config/env.js";
+import requestLogger from "./middleware/requestLogger.js";
 import healthRoutes from "./routes/health.js";
 import authRoutes from "./routes/auth.routes.js";
 import linkRoutes from "./routes/link.routes.js";
@@ -26,18 +27,19 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 app.use(cookieParser());
+app.use(requestLogger);
 
-const limiter = rateLimit({
+const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: { success: false, message: "Too many requests, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use("/api", limiter);
+app.use("/api", apiLimiter);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -51,6 +53,24 @@ app.use("/api/v1/auth/login", authLimiter);
 app.use("/api/v1/auth/forgot-password", authLimiter);
 app.use("/api/v1/auth/reset-password", authLimiter);
 app.use("/api/v1/auth/refresh", authLimiter);
+
+const redirectLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 60,
+  message: { success: false, message: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/r", redirectLimiter);
+
+const bioLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 30,
+  message: { success: false, message: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/v1/bio", bioLimiter);
 
 app.use("/api", healthRoutes);
 app.use("/api/v1/auth", authRoutes);

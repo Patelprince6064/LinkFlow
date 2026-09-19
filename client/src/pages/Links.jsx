@@ -115,6 +115,17 @@ function Links() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
+                      <a
+                        href={link.shortUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                        title="Open in new tab"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
                       <button
                         onClick={() => handleCopy(link.shortUrl)}
                         className="rounded p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"

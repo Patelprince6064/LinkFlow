@@ -8,11 +8,12 @@ const api = axios.create({
   },
 });
 
-const AUTH_ENDPOINTS = [
+const SKIP_REFRESH_URLS = [
   "/v1/auth/login",
   "/v1/auth/register",
   "/v1/auth/refresh",
   "/v1/auth/logout",
+  "/v1/auth/me",
 ];
 
 let isRefreshing = false;
@@ -31,11 +32,11 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      const isAuthEndpoint = AUTH_ENDPOINTS.some((endpoint) =>
+      const shouldSkip = SKIP_REFRESH_URLS.some((endpoint) =>
         originalRequest.url?.includes(endpoint)
       );
 
-      if (isAuthEndpoint) {
+      if (shouldSkip) {
         return Promise.reject(error);
       }
 
@@ -56,7 +57,6 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        window.location.href = "/login";
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

@@ -36,45 +36,47 @@ app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 app.use(cookieParser());
 app.use(requestLogger);
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { success: false, message: "Too many requests, please try again later." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use("/api", apiLimiter);
+if (env.NODE_ENV === "production") {
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { success: false, message: "Too many requests, please try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use("/api", apiLimiter);
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  message: { success: false, message: "Too many authentication attempts, please try again later." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use("/api/v1/auth/register", authLimiter);
-app.use("/api/v1/auth/login", authLimiter);
-app.use("/api/v1/auth/forgot-password", authLimiter);
-app.use("/api/v1/auth/reset-password", authLimiter);
-app.use("/api/v1/auth/refresh", authLimiter);
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: { success: false, message: "Too many authentication attempts, please try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use("/api/v1/auth/register", authLimiter);
+  app.use("/api/v1/auth/login", authLimiter);
+  app.use("/api/v1/auth/forgot-password", authLimiter);
+  app.use("/api/v1/auth/reset-password", authLimiter);
+  app.use("/api/v1/auth/refresh", authLimiter);
 
-const redirectLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 60,
-  message: { success: false, message: "Too many requests, please try again later." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use("/r", redirectLimiter);
+  const redirectLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 60,
+    message: { success: false, message: "Too many requests, please try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use("/r", redirectLimiter);
 
-const bioLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000,
-  max: 30,
-  message: { success: false, message: "Too many requests, please try again later." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use("/api/v1/bio", bioLimiter);
+  const bioLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 30,
+    message: { success: false, message: "Too many requests, please try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use("/api/v1/bio", bioLimiter);
+}
 
 app.use("/api", healthRoutes);
 app.use("/api/v1/auth", authRoutes);

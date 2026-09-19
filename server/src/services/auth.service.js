@@ -109,7 +109,7 @@ export const loginUser = async ({ email, password }, res) => {
   setAccessCookie(res, accessToken);
   setRefreshCookie(res, refreshToken);
 
-  return { user: safeUser(user) };
+  return { user: safeUser(user), accessToken, refreshToken };
 };
 
 export const refreshSession = async (token, res) => {
@@ -155,7 +155,7 @@ export const refreshSession = async (token, res) => {
   setAccessCookie(res, newAccessToken);
   setRefreshCookie(res, newRefreshToken);
 
-  return { user: safeUser(user) };
+  return { user: safeUser(user), accessToken: newAccessToken, refreshToken: newRefreshToken };
 };
 
 export const logoutUser = async (userId, res) => {

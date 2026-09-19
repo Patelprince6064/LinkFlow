@@ -1,11 +1,46 @@
 import axios from "axios";
 
+const REFRESH_TOKEN_KEY = "lh_rt";
+const ACCESS_TOKEN_KEY = "lh_at";
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "/api",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
+});
+
+let inMemoryRefreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY) || null;
+let inMemoryAccessToken = sessionStorage.getItem(ACCESS_TOKEN_KEY) || null;
+
+export const setTokens = (accessToken, refreshToken) => {
+  inMemoryAccessToken = accessToken || null;
+  inMemoryRefreshToken = refreshToken || null;
+  if (accessToken) {
+    sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  } else {
+    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  }
+  if (refreshToken) {
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  } else {
+    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
+};
+
+export const clearTokens = () => {
+  inMemoryAccessToken = null;
+  inMemoryRefreshToken = null;
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+};
+
+api.interceptors.request.use((config) => {
+  if (inMemoryAccessToken) {
+    config.headers.Authorization = `Bearer ${inMemoryAccessToken}`;
+  }
+  return config;
 });
 
 const SKIP_REFRESH_URLS = [
@@ -52,10 +87,24 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await api.post("/v1/auth/refresh");
+        const refreshPayload = inMemoryRefreshToken
+          ? { refreshToken: inMemoryRefreshToken }
+          : {};
+        const refreshResponse = await api.post(
+          "/v1/auth/refresh",
+          refreshPayload
+        );
+
+        const newAccessToken = refreshResponse.data?.data?.accessToken;
+        const newRefreshToken = refreshResponse.data?.data?.refreshToken;
+        if (newAccessToken || newRefreshToken) {
+          setTokens(newAccessToken, newRefreshToken);
+        }
+
         processQueue(null);
         return api(originalRequest);
       } catch (refreshError) {
+        clearTokens();
         processQueue(refreshError);
         return Promise.reject(refreshError);
       } finally {

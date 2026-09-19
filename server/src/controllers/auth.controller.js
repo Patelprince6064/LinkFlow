@@ -25,23 +25,23 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const { user } = await authService.loginUser({ email, password }, res);
+  const { user, accessToken, refreshToken } = await authService.loginUser({ email, password }, res);
 
   res.status(200).json({
     success: true,
     message: "Login successful",
-    data: { user },
+    data: { user, accessToken, refreshToken },
   });
 });
 
 export const refresh = asyncHandler(async (req, res) => {
-  const token = req.cookies?.refresh_token;
-  const { user } = await authService.refreshSession(token, res);
+  const token = req.cookies?.refresh_token || req.body?.refreshToken;
+  const { user, accessToken, refreshToken } = await authService.refreshSession(token, res);
 
   res.status(200).json({
     success: true,
     message: "Session refreshed",
-    data: { user },
+    data: { user, accessToken, refreshToken },
   });
 });
 

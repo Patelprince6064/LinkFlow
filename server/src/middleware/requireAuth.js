@@ -5,7 +5,11 @@ import AppError from "../utils/AppError.js";
 
 const requireAuth = async (req, res, next) => {
   try {
-    const token = req.cookies?.[ACCESS_COOKIE];
+    const token =
+      req.cookies?.[ACCESS_COOKIE] ||
+      (req.headers.authorization?.startsWith("Bearer ")
+        ? req.headers.authorization.slice(7)
+        : null);
 
     if (!token) {
       throw new AppError("Authentication required", 401);

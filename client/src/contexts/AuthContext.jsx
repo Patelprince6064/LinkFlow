@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import api from "../services/api";
+import api, { setTokens, clearTokens } from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -11,8 +11,23 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.get("/v1/auth/me");
       setUser(response.data.data.user);
-    } catch {
-      setUser(null);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        try {
+          const refreshResponse = await api.post("/v1/auth/refresh");
+          const { accessToken, refreshToken } = refreshResponse.data.data || {};
+          if (accessToken || refreshToken) {
+            setTokens(accessToken, refreshToken);
+          }
+          const retryResponse = await api.get("/v1/auth/me");
+          setUser(retryResponse.data.data.user);
+        } catch {
+          clearTokens();
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -35,6 +50,10 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const response = await api.post("/v1/auth/login", { email, password });
     setUser(response.data.data.user);
+    const { accessToken, refreshToken } = response.data.data;
+    if (accessToken || refreshToken) {
+      setTokens(accessToken, refreshToken);
+    }
     return response.data;
   };
 
@@ -42,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.post("/v1/auth/logout");
     } finally {
+      clearTokens();
       setUser(null);
     }
   };

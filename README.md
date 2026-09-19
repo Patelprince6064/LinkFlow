@@ -330,7 +330,7 @@ short-link-bio-hub/
 │   │   ├── contexts/                # AuthContext, ToastContext
 │   │   ├── hooks/                   # useLinks, useAnalytics, useBio
 │   │   ├── layouts/                 # PublicLayout, DashboardLayout
-│   │   ├── pages/                   # 14 page components
+│   │   ├── pages/                   # 13 page components
 │   │   ├── routes/                  # AppRoutes
 │   │   └── services/                # Axios API client
 │   ├── package.json

@@ -227,6 +227,44 @@ Complete API reference: [docs/api.md](docs/api.md)
 | 8 | Security hardening (validation, rate limits, logging) | Complete |
 | 9 | UI/UX polish (responsive, accessibility, toasts) | Complete |
 | 10 | Testing, API docs, requirements audit | Complete |
+| 11 | Deployment config + production preparation | Complete |
+
+## Deployment
+
+### Quick Start (Production)
+
+1. **MongoDB Atlas** — Create M0 cluster, get connection string
+2. **Backend (Render)** — Deploy `server/` directory, set environment variables
+3. **Frontend (Vercel)** — Deploy `client/` directory, set `VITE_API_URL`
+
+Detailed instructions: [docs/deployment.md](docs/deployment.md)
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and configure. Key production variables:
+
+```bash
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/linkflow
+CLIENT_URL=https://your-frontend.vercel.app
+PUBLIC_BASE_URL=https://your-backend.onrender.com
+JWT_ACCESS_SECRET=<random 64+ chars>
+JWT_REFRESH_SECRET=<random 64+ chars, different from access>
+COOKIE_SECURE=true
+COOKIE_SAME_SITE=none
+```
+
+### Frontend Build
+
+```bash
+cd client && npm run build    # Outputs to dist/
+```
+
+### Backend Start
+
+```bash
+cd server && node src/server.js
+```
 
 ## License
 

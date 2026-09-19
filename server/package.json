@@ -10,6 +10,7 @@
     "seed": "node src/utils/seed.js",
     "test:models": "node src/utils/testModels.js",
     "test:schema": "node src/utils/testSchema.js",
+    "test:auth": "node src/utils/testAuth.js",
     "lint": "eslint src/"
   },
   "dependencies": {

@@ -1,19 +1,36 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-function Register() {
-  const { register } = useAuth();
+function ResetPassword() {
+  const { resetPassword } = useAuth();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const token = searchParams.get("token");
+
+  const [formData, setFormData] = useState({ password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+
+  if (!token) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-24 sm:px-6">
+        <div className="rounded-lg border border-border bg-card p-6 text-center">
+          <h2 className="text-lg font-bold text-foreground">Invalid Reset Link</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            No reset token provided. Please request a new password reset.
+          </p>
+          <Link
+            to="/forgot-password"
+            className="mt-4 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Forgot password
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,12 +55,11 @@ function Register() {
     }
 
     try {
-      await register(formData.name, formData.email, formData.password);
-      setSuccess(
-        "Registration successful! Please check the server console for your email verification link."
-      );
+      await resetPassword(token, formData.password);
+      setSuccess("Password reset successful! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      setError(err.response?.data?.message || "Password reset failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -53,14 +69,8 @@ function Register() {
     return (
       <div className="mx-auto max-w-md px-4 py-24 sm:px-6">
         <div className="rounded-lg border border-border bg-card p-6 text-center">
-          <h2 className="text-lg font-bold text-foreground">Check your email</h2>
+          <h2 className="text-lg font-bold text-foreground">Password Reset</h2>
           <p className="mt-2 text-sm text-muted-foreground">{success}</p>
-          <Link
-            to="/login"
-            className="mt-4 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            Go to login
-          </Link>
         </div>
       </div>
     );
@@ -69,13 +79,8 @@ function Register() {
   return (
     <div className="mx-auto max-w-md px-4 py-24 sm:px-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link to="/login" className="font-medium text-foreground hover:underline">
-            Log in
-          </Link>
-        </p>
+        <h1 className="text-2xl font-bold text-foreground">Reset your password</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Enter your new password below.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -86,40 +91,8 @@ function Register() {
         )}
 
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-foreground">
-            Name
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            value={formData.name}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="Your name"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-foreground">
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            value={formData.email}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="you@example.com"
-          />
-        </div>
-
-        <div>
           <label htmlFor="password" className="block text-sm font-medium text-foreground">
-            Password
+            New Password
           </label>
           <input
             id="password"
@@ -154,11 +127,11 @@ function Register() {
           disabled={loading}
           className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
-          {loading ? "Creating account..." : "Create account"}
+          {loading ? "Resetting..." : "Reset password"}
         </button>
       </form>
     </div>
   );
 }
 
-export default Register;
+export default ResetPassword;

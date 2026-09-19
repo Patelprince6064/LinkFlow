@@ -1,6 +1,9 @@
 import { Outlet } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 function DashboardLayout() {
+  const { logout } = useAuth();
+
   return (
     <div className="min-h-screen flex bg-background">
       <aside className="hidden w-64 shrink-0 border-r border-border bg-card lg:block">
@@ -22,7 +25,10 @@ function DashboardLayout() {
       <div className="flex flex-1 flex-col">
         <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
           <p className="text-sm text-muted-foreground">Dashboard</p>
-          <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <button
+            onClick={logout}
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
             Log out
           </button>
         </header>

@@ -3,6 +3,7 @@ import AppError from "../utils/AppError.js";
 import { generateSecureToken, hashToken, compareTokenHash, hashPassword, comparePassword } from "../utils/token.js";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwt.js";
 import { setAccessCookie, setRefreshCookie, clearAuthCookies } from "../utils/cookie.js";
+import { sendVerificationEmail, sendPasswordResetEmail } from "./email.service.js";
 import crypto from "crypto";
 
 const PASSWORD_MIN_LENGTH = 8;
@@ -42,10 +43,14 @@ export const registerUser = async ({ name, email, password }) => {
     emailVerificationExpires,
   });
 
+  // Always log token in dev for easy testing
   if (process.env.NODE_ENV !== "production") {
     console.log(`\n[EMAIL VERIFICATION] Token: ${verificationToken}`);
     console.log(`[EMAIL VERIFICATION] URL: ${process.env.CLIENT_URL || "http://localhost:5173"}/verify-email?token=${verificationToken}\n`);
   }
+
+  // Send real verification email
+  await sendVerificationEmail({ name: user.name, email: user.email, token: verificationToken });
 
   return { user: safeUser(user), verificationToken };
 };
@@ -176,10 +181,14 @@ export const requestPasswordReset = async (email) => {
   user.passwordResetExpires = passwordResetExpires;
   await user.save({ validateModifiedOnly: true });
 
+  // Always log token in dev for easy testing
   if (process.env.NODE_ENV !== "production") {
     console.log(`\n[PASSWORD RESET] Token: ${resetToken}`);
     console.log(`[PASSWORD RESET] URL: ${process.env.CLIENT_URL || "http://localhost:5173"}/reset-password?token=${resetToken}\n`);
   }
+
+  // Send real password reset email
+  await sendPasswordResetEmail({ name: user.name, email: user.email, token: resetToken });
 
   return { message: "If an account exists for this email, password reset instructions have been generated." };
 };

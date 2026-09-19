@@ -32,7 +32,7 @@ export const registerUser = async ({ name, email, password }) => {
 
   const passwordHash = await hashPassword(password);
   const verificationToken = generateSecureToken();
-  const emailVerificationTokenHash = await hashToken(verificationToken);
+  const emailVerificationTokenHash = hashToken(verificationToken);
   const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   const user = await User.create({
@@ -60,7 +60,7 @@ export const verifyEmail = async (token) => {
     throw new AppError("Verification token is required", 400);
   }
 
-  const tokenHash = await hashToken(token);
+  const tokenHash = hashToken(token);
 
   const user = await User.findOne({
     emailVerificationTokenHash: tokenHash,
@@ -101,7 +101,7 @@ export const loginUser = async ({ email, password }, res) => {
   const accessToken = generateAccessToken(user);
   const jti = crypto.randomUUID();
   const refreshToken = generateRefreshToken(user, jti);
-  const refreshTokenHash = await hashToken(refreshToken);
+  const refreshTokenHash = hashToken(refreshToken);
 
   user.refreshTokenHash = refreshTokenHash;
   await user.save({ validateModifiedOnly: true });
@@ -136,7 +136,7 @@ export const refreshSession = async (token, res) => {
     throw new AppError("User not found", 401);
   }
 
-  const isValidRefresh = await compareTokenHash(token, user.refreshTokenHash);
+  const isValidRefresh = compareTokenHash(token, user.refreshTokenHash);
   if (!isValidRefresh) {
     user.refreshTokenHash = undefined;
     await user.save({ validateModifiedOnly: true });
@@ -147,7 +147,7 @@ export const refreshSession = async (token, res) => {
   const newAccessToken = generateAccessToken(user);
   const newJti = crypto.randomUUID();
   const newRefreshToken = generateRefreshToken(user, newJti);
-  const newRefreshTokenHash = await hashToken(newRefreshToken);
+  const newRefreshTokenHash = hashToken(newRefreshToken);
 
   user.refreshTokenHash = newRefreshTokenHash;
   await user.save({ validateModifiedOnly: true });
@@ -174,7 +174,7 @@ export const requestPasswordReset = async (email) => {
   }
 
   const resetToken = generateSecureToken();
-  const passwordResetTokenHash = await hashToken(resetToken);
+  const passwordResetTokenHash = hashToken(resetToken);
   const passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
 
   user.passwordResetTokenHash = passwordResetTokenHash;
@@ -200,7 +200,7 @@ export const resetPassword = async ({ token, password }) => {
     throw new AppError("Reset token is required", 400);
   }
 
-  const tokenHash = await hashToken(token);
+  const tokenHash = hashToken(token);
 
   const user = await User.findOne({
     passwordResetTokenHash: tokenHash,

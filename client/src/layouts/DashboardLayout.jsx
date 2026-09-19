@@ -42,9 +42,9 @@ function DashboardLayout() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen bg-background lg:flex">
       {/* Desktop Sidebar */}
-      <aside className="hidden w-64 shrink-0 border-r border-border bg-card lg:block">
+      <aside className="hidden w-64 shrink-0 border-r border-border bg-card lg:block lg:sticky lg:top-0 lg:h-screen">
         <div className="flex h-16 items-center border-b border-border px-6">
           <Link to="/dashboard" className="text-lg font-bold text-foreground">
             LinkHub
@@ -146,8 +146,8 @@ function DashboardLayout() {
         </div>
       </aside>
 
-      <div className="flex flex-1 flex-col min-w-0">
-        <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4 sm:px-6 safe-top">
+      <div className="flex-1 min-w-0">
+        <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4 sm:px-6 safe-top shrink-0">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileNavOpen(true)}
@@ -171,7 +171,7 @@ function DashboardLayout() {
           </button>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">
+        <main className="p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

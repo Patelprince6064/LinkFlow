@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useAnalyticsOverview, useClicksOverTime, useTopReferrers, useDeviceDistribution } from "../hooks/useAnalytics";
 import { useLinks } from "../hooks/useLinks";
+import { StatCardSkeleton, ChartSkeleton, EmptyState } from "../components/common/UIComponents";
 
 const DATE_PRESETS = [
-  { label: "Last 7 days", days: 7 },
-  { label: "Last 30 days", days: 30 },
-  { label: "Last 90 days", days: 90 },
+  { label: "7d", days: 7 },
+  { label: "30d", days: 30 },
+  { label: "90d", days: 90 },
 ];
 
 const DEVICE_COLORS = { Desktop: "#3b82f6", Mobile: "#22c55e", Tablet: "#f59e0b" };
@@ -43,46 +44,46 @@ function Analytics() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Track how your short links are performing.
           </p>
         </div>
-        <button
-          onClick={refreshAll}
-          className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground hover:bg-accent"
-        >
-          Refresh
-        </button>
-      </div>
-
-      <div className="mt-4 flex gap-2">
-        {DATE_PRESETS.map((preset) => (
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1">
+            {DATE_PRESETS.map((preset) => (
+              <button
+                key={preset.days}
+                onClick={() => setDatePreset(preset.days)}
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  datePreset === preset.days
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border text-foreground hover:bg-accent"
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
           <button
-            key={preset.days}
-            onClick={() => setDatePreset(preset.days)}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              datePreset === preset.days
-                ? "bg-primary text-primary-foreground"
-                : "border border-border text-foreground hover:bg-accent"
-            }`}
+            onClick={refreshAll}
+            className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm text-foreground hover:bg-accent transition-colors"
           >
-            {preset.label}
+            Refresh
           </button>
-        ))}
+        </div>
       </div>
 
-      {isLoading && (
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-lg border border-border bg-card" />
-          ))}
+      {isLoading ? (
+        <div className="mt-6 space-y-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[...Array(4)].map((_, i) => <StatCardSkeleton key={i} />)}
+          </div>
+          <ChartSkeleton />
         </div>
-      )}
-
-      {!isLoading && (
+      ) : (
         <>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard title="Total Clicks" value={overview.data?.totalClicks ?? 0} />
@@ -90,7 +91,7 @@ function Analytics() {
             <StatCard title="Active Links" value={overview.data?.activeLinks ?? 0} />
             <StatCard
               title="Top Link"
-              value={overview.data?.topLink ? `/${overview.data.topLink.shortCode}` : "—"}
+              value={overview.data?.topLink ? `/${overview.data.topLink.shortCode}` : "\u2014"}
               subtitle={overview.data?.topLink ? `${overview.data.topLink.clicks} clicks` : "No clicks yet"}
             />
           </div>
@@ -98,7 +99,7 @@ function Analytics() {
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="rounded-lg border border-border bg-card p-4 lg:col-span-2">
               <h2 className="text-sm font-medium text-foreground">Clicks Over Time</h2>
-              {clicksOverTime.data && clicksOverTime.data.length > 0 ? (
+              {clicksOverTime.data && clicksOverTime.data.some((d) => d.clicks > 0) ? (
                 <div className="mt-4 h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={clicksOverTime.data}>
@@ -117,7 +118,10 @@ function Analytics() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-muted-foreground">No click data yet.</p>
+                <EmptyState
+                  title="No click data yet"
+                  description="Share your short links to start collecting analytics."
+                />
               )}
             </div>
 
@@ -162,7 +166,10 @@ function Analytics() {
                   </div>
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-muted-foreground">No device data yet.</p>
+                <EmptyState
+                  title="No device data yet"
+                  description="Device info appears after your links receive clicks."
+                />
               )}
             </div>
           </div>
@@ -180,7 +187,10 @@ function Analytics() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-muted-foreground">No referrer data yet.</p>
+                <EmptyState
+                  title="No referrer data yet"
+                  description="Referrer info appears when people click your links from other sites."
+                />
               )}
             </div>
 
@@ -190,15 +200,14 @@ function Analytics() {
                 <div className="mt-4 space-y-2">
                   {linksData.data.links.slice(0, 8).map((link) => (
                     <div key={link.id} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
+                      <div className="min-w-0 flex-1">
                         <span className="font-mono text-foreground">/{link.shortCode}</span>
-                        <span className="truncate max-w-[150px] text-muted-foreground">{link.destinationUrl}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">{link.clickCount} clicks</span>
+                        <span className="text-muted-foreground">{link.clickCount}</span>
                         <Link
                           to={`/dashboard/analytics/${link.id}`}
-                          className="text-xs text-foreground hover:underline"
+                          className="text-xs font-medium text-foreground hover:underline"
                         >
                           View
                         </Link>
@@ -207,7 +216,18 @@ function Analytics() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-muted-foreground">No links yet.</p>
+                <EmptyState
+                  title="No links yet"
+                  description="Create your first short link to see performance data."
+                  action={
+                    <Link
+                      to="/dashboard/links"
+                      className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                    >
+                      Create Link
+                    </Link>
+                  }
+                />
               )}
             </div>
           </div>

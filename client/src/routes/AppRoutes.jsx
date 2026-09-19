@@ -14,6 +14,7 @@ import Analytics from "../pages/Analytics";
 import LinkAnalytics from "../pages/LinkAnalytics";
 import BioEditor from "../pages/BioEditor";
 import PublicBio from "../pages/PublicBio";
+import NotFound from "../pages/NotFound";
 
 function AppRoutes() {
   return (
@@ -26,6 +27,7 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/bio/:username" element={<PublicBio />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
 
       <Route
@@ -40,6 +42,7 @@ function AppRoutes() {
         <Route path="/dashboard/analytics" element={<Analytics />} />
         <Route path="/dashboard/analytics/:linkId" element={<LinkAnalytics />} />
         <Route path="/dashboard/bio" element={<BioEditor />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );

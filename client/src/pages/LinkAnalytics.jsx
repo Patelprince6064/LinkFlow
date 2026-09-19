@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useLinkAnalytics } from "../hooks/useAnalytics";
+import { StatCardSkeleton, EmptyState } from "../components/common/UIComponents";
 
 const DEVICE_COLORS = { Desktop: "#3b82f6", Mobile: "#22c55e", Tablet: "#f59e0b" };
 
@@ -24,20 +25,41 @@ function LinkAnalytics() {
 
   if (analytics.isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="h-8 w-48 animate-pulse rounded bg-accent" />
-        <div className="h-64 animate-pulse rounded-lg border border-border bg-card" />
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Link to="/dashboard/analytics" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            &larr; Analytics
+          </Link>
+        </div>
+        <div className="space-y-4">
+          <div className="h-8 w-48 animate-pulse rounded bg-accent" />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[...Array(3)].map((_, i) => <StatCardSkeleton key={i} />)}
+          </div>
+          <div className="h-64 animate-pulse rounded-lg border border-border bg-card" />
+        </div>
       </div>
     );
   }
 
   if (analytics.isError) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Link not found.</p>
-        <Link to="/dashboard/analytics" className="mt-2 inline-block text-sm text-foreground hover:underline">
-          Back to Analytics
+      <div className="space-y-4">
+        <Link to="/dashboard/analytics" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          &larr; Analytics
         </Link>
+        <EmptyState
+          title="Link not found"
+          description="The link you're looking for doesn't exist or has been deleted."
+          action={
+            <Link
+              to="/dashboard/analytics"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              Back to Analytics
+            </Link>
+          }
+        />
       </div>
     );
   }
@@ -46,18 +68,16 @@ function LinkAnalytics() {
 
   return (
     <div>
-      <div className="flex items-center gap-3">
-        <Link to="/dashboard/analytics" className="text-muted-foreground hover:text-foreground text-sm">
-          ← Analytics
-        </Link>
-      </div>
+      <Link to="/dashboard/analytics" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+        &larr; Analytics
+      </Link>
 
-      <div className="mt-4 flex items-start justify-between">
-        <div>
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold text-foreground font-mono">/{data.link.shortCode}</h1>
           <p className="mt-1 text-sm text-muted-foreground truncate max-w-md">{data.link.destinationUrl}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {[7, 30, 90].map((days) => (
             <button
               key={days}
@@ -110,7 +130,10 @@ function LinkAnalytics() {
             </ResponsiveContainer>
           </div>
         ) : (
-          <p className="mt-4 text-sm text-muted-foreground">No click data yet.</p>
+          <EmptyState
+            title="No click data yet"
+            description="Share this short link to start collecting analytics."
+          />
         )}
       </div>
 
@@ -156,7 +179,10 @@ function LinkAnalytics() {
               </div>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-muted-foreground">No device data yet.</p>
+            <EmptyState
+              title="No device data yet"
+              description="Device info appears after this link receives clicks."
+            />
           )}
         </div>
 
@@ -172,7 +198,10 @@ function LinkAnalytics() {
               ))}
             </div>
           ) : (
-            <p className="mt-4 text-sm text-muted-foreground">No referrer data yet.</p>
+            <EmptyState
+              title="No referrer data yet"
+              description="Referrer info appears when people click from other sites."
+            />
           )}
         </div>
       </div>

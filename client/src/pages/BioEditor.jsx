@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useMyBio, useCreateBio, useUpdateBio, useDeleteBio } from "../hooks/useBio";
+import { useToast } from "../contexts/ToastContext";
 import BioPreview from "../components/BioPreview";
+import { EmptyState } from "../components/common/UIComponents";
 
 const THEMES = ["Minimal Light", "Dark Slate", "Gradient"];
 
@@ -11,6 +13,7 @@ function BioEditor() {
   const createMutation = useCreateBio();
   const updateMutation = useUpdateBio();
   const deleteMutation = useDeleteBio();
+  const toast = useToast();
 
   const [form, setForm] = useState({
     username: "",
@@ -52,9 +55,15 @@ function BioEditor() {
     };
 
     if (profile) {
-      updateMutation.mutate(data);
+      updateMutation.mutate(data, {
+        onSuccess: () => toast.success("Profile updated successfully"),
+        onError: (err) => toast.error(err.response?.data?.message || "Failed to update profile"),
+      });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(data, {
+        onSuccess: () => toast.success("Profile created successfully"),
+        onError: (err) => toast.error(err.response?.data?.message || "Failed to create profile"),
+      });
     }
   };
 
@@ -125,6 +134,7 @@ function BioEditor() {
     deleteMutation.mutate(undefined, {
       onSuccess: () => {
         setShowDeleteConfirm(false);
+        toast.success("Profile deleted successfully");
         setForm({
           username: "",
           displayName: "",
@@ -134,6 +144,7 @@ function BioEditor() {
           socialLinks: [],
         });
       },
+      onError: () => toast.error("Failed to delete profile"),
     });
   };
 

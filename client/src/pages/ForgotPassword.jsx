@@ -27,13 +27,13 @@ function ForgotPassword() {
 
   if (success) {
     return (
-      <div className="mx-auto max-w-md px-4 py-24 sm:px-6">
-        <div className="rounded-lg border border-border bg-card p-6 text-center">
+      <div className="flex min-h-[80vh] items-center justify-center px-4">
+        <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6 text-center">
           <h2 className="text-lg font-bold text-foreground">Check your email</h2>
           <p className="mt-2 text-sm text-muted-foreground">{success}</p>
           <Link
             to="/login"
-            className="mt-4 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Back to login
           </Link>
@@ -43,51 +43,54 @@ function ForgotPassword() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-24 sm:px-6">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-foreground">Forgot your password?</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Enter your email and we&apos;ll send you a reset link.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-        {error && (
-          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground">
-            {error}
-          </div>
-        )}
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-foreground">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => { setEmail(e.target.value); setError(""); }}
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="you@example.com"
-          />
+    <div className="flex min-h-[80vh] items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground">Forgot your password?</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Enter your email and we&apos;ll send you a reset link.
+          </p>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-        >
-          {loading ? "Sending..." : "Send reset link"}
-        </button>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4" noValidate>
+          {error && (
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground" role="alert">
+              {error}
+            </div>
+          )}
 
-        <p className="text-center text-sm text-muted-foreground">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-foreground">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(""); }}
+              className="mt-1 block h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
+            {loading ? "Sending..." : "Send reset link"}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           Remember your password?{" "}
           <Link to="/login" className="font-medium text-foreground hover:underline">
             Log in
           </Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }

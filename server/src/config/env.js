@@ -14,6 +14,7 @@ const env = {
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
   ACCESS_TOKEN_EXPIRES_IN: process.env.ACCESS_TOKEN_EXPIRES_IN || "15m",
   REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN || "7d",
+  PUBLIC_BASE_URL: process.env.PUBLIC_BASE_URL || "http://localhost:5000",
 };
 
 const requiredEnvVars = ["MONGODB_URI"];

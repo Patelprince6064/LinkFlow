@@ -52,7 +52,6 @@ const linkSchema = new mongoose.Schema(
   }
 );
 
-linkSchema.index({ shortCode: 1 });
 linkSchema.index({ user: 1, createdAt: -1 });
 
 const Link = mongoose.model("Link", linkSchema);

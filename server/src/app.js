@@ -6,6 +6,7 @@ import rateLimit from "express-rate-limit";
 import env from "./config/env.js";
 import healthRoutes from "./routes/health.js";
 import authRoutes from "./routes/auth.routes.js";
+import linkRoutes from "./routes/link.routes.js";
 import notFound from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
 
@@ -50,6 +51,7 @@ app.use("/api/v1/auth/refresh", authLimiter);
 
 app.use("/api", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/links", linkRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

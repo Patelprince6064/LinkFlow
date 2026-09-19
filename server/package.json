@@ -11,6 +11,7 @@
     "test:models": "node src/utils/testModels.js",
     "test:schema": "node src/utils/testSchema.js",
     "test:auth": "node src/utils/testAuth.js",
+    "test:analytics": "node src/__tests__/analytics.test.js",
     "lint": "eslint src/"
   },
   "dependencies": {

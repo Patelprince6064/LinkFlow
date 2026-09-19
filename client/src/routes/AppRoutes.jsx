@@ -10,6 +10,8 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import Dashboard from "../pages/Dashboard";
 import Links from "../pages/Links";
+import Analytics from "../pages/Analytics";
+import LinkAnalytics from "../pages/LinkAnalytics";
 
 function AppRoutes() {
   return (
@@ -32,6 +34,8 @@ function AppRoutes() {
       >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/links" element={<Links />} />
+        <Route path="/dashboard/analytics" element={<Analytics />} />
+        <Route path="/dashboard/analytics/:linkId" element={<LinkAnalytics />} />
       </Route>
     </Routes>
   );

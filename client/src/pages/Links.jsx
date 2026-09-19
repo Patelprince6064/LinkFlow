@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useLinks, useCreateLink, useUpdateLink, useDeleteLink } from "../hooks/useLinks";
+import QRCodeModal from "../components/QRCodeModal";
 
 function Links() {
   const [page, setPage] = useState(1);
@@ -9,6 +10,7 @@ function Links() {
   const [showCreate, setShowCreate] = useState(false);
   const [editLink, setEditLink] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [qrLink, setQrLink] = useState(null);
 
   const { data, isLoading, error } = useLinks({ page, search: debouncedSearch });
   const createMutation = useCreateLink();
@@ -125,6 +127,15 @@ function Links() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                       </Link>
+                      <button
+                        onClick={() => setQrLink(link)}
+                        className="rounded p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                        title="QR Code"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                      </button>
                       <a
                         href={link.shortUrl}
                         target="_blank"
@@ -245,6 +256,14 @@ function Links() {
             })
           }
           isLoading={deleteMutation.isPending}
+        />
+      )}
+
+      {qrLink && (
+        <QRCodeModal
+          shortCode={qrLink.shortCode}
+          shortUrl={qrLink.shortUrl}
+          onClose={() => setQrLink(null)}
         />
       )}
     </div>

@@ -9,6 +9,7 @@ function DashboardLayout() {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/dashboard/links", label: "Links" },
     { href: "/dashboard/analytics", label: "Analytics" },
+    { href: "/dashboard/bio", label: "Bio" },
   ];
 
   return (

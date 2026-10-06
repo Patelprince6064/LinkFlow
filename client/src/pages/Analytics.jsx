@@ -25,13 +25,33 @@ function getDateRange(days) {
 
 function Analytics() {
   const [datePreset, setDatePreset] = useState(7);
+  const [linkSearch, setLinkSearch] = useState("");
+  const [showAllLinks, setShowAllLinks] = useState(false);
   const { startDate, endDate } = useMemo(() => getDateRange(datePreset), [datePreset]);
 
   const overview = useAnalyticsOverview({ startDate, endDate });
   const clicksOverTime = useClicksOverTime({ startDate, endDate });
   const referrers = useTopReferrers({ startDate, endDate, limit: 8 });
   const devices = useDeviceDistribution({ startDate, endDate });
-  const linksData = useLinks({ page: 1, limit: 50 });
+  const linksData = useLinks({ page: 1, limit: 100 });
+
+  const allLinks = useMemo(() => {
+    const links = linksData.data?.links ?? [];
+    return [...links].sort((a, b) => (b.clickCount ?? 0) - (a.clickCount ?? 0));
+  }, [linksData.data]);
+
+  const filteredLinks = useMemo(() => {
+    const q = linkSearch.trim().toLowerCase();
+    if (!q) return allLinks;
+    return allLinks.filter(
+      (link) =>
+        link.shortCode?.toLowerCase().includes(q) ||
+        link.destinationUrl?.toLowerCase().includes(q)
+    );
+  }, [allLinks, linkSearch]);
+
+  const visibleLinks = showAllLinks ? filteredLinks : filteredLinks.slice(0, 8);
+  const totalLinkCount = linksData.data?.pagination?.total ?? allLinks.length;
 
   const isLoading = overview.isLoading || clicksOverTime.isLoading || referrers.isLoading || devices.isLoading;
 
@@ -196,25 +216,83 @@ function Analytics() {
             </div>
 
             <div className="rounded-lg border border-border bg-card p-4">
-              <h2 className="text-sm font-medium text-foreground">Link Performance</h2>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-medium text-foreground">
+                  Link Performance
+                  {totalLinkCount > 0 && (
+                    <span className="ml-1.5 font-normal text-muted-foreground">({totalLinkCount})</span>
+                  )}
+                </h2>
+                <Link
+                  to="/dashboard/links"
+                  className="shrink-0 text-xs font-medium text-foreground hover:underline"
+                >
+                  View all
+                </Link>
+              </div>
               {linksData.data?.links && linksData.data.links.length > 0 ? (
-                <div className="mt-4 space-y-2">
-                  {linksData.data.links.slice(0, 8).map((link) => (
-                    <div key={link.id} className="flex items-center justify-between text-sm">
-                      <div className="min-w-0 flex-1">
-                        <span className="font-mono text-foreground">/{link.shortCode}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">{link.clickCount}</span>
-                        <Link
-                          to={`/dashboard/analytics/${link.id}`}
-                          className="text-xs font-medium text-foreground hover:underline"
-                        >
-                          View
-                        </Link>
-                      </div>
+                <div className="mt-3">
+                  {totalLinkCount > 5 && (
+                    <div className="relative">
+                      <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        value={linkSearch}
+                        onChange={(e) => setLinkSearch(e.target.value)}
+                        placeholder="Search links..."
+                        className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                      />
                     </div>
-                  ))}
+                  )}
+                  {filteredLinks.length > 0 ? (
+                    <>
+                      <div className={`mt-3 space-y-2 ${showAllLinks ? "max-h-64 overflow-y-auto pr-1" : ""}`}>
+                        {visibleLinks.map((link) => (
+                          <div key={link.id} className="flex items-center justify-between gap-2 text-sm">
+                            <div className="min-w-0 flex-1">
+                              <span className="font-mono text-foreground">/{link.shortCode}</span>
+                              {link.destinationUrl && (
+                                <p className="truncate text-xs text-muted-foreground" title={link.destinationUrl}>
+                                  {link.destinationUrl}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex shrink-0 items-center gap-2">
+                              <span className="text-muted-foreground">{link.clickCount}</span>
+                              <Link
+                                to={`/dashboard/analytics/${link.id}`}
+                                className="text-xs font-medium text-foreground hover:underline"
+                              >
+                                View
+                              </Link>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {filteredLinks.length > 8 && (
+                        <button
+                          onClick={() => setShowAllLinks((v) => !v)}
+                          className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                        >
+                          {showAllLinks ? "Show less" : `Show all ${filteredLinks.length} links`}
+                        </button>
+                      )}
+                      {linksData.data?.pagination && totalLinkCount > allLinks.length && (
+                        <p className="mt-2 text-center text-xs text-muted-foreground">
+                          Showing {allLinks.length} of {totalLinkCount}.{" "}
+                          <Link to="/dashboard/links" className="font-medium text-foreground hover:underline">
+                            Manage all in Links
+                          </Link>
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="mt-4 text-center text-sm text-muted-foreground">
+                      No links match &ldquo;{linkSearch}&rdquo;.
+                    </p>
+                  )}
                 </div>
               ) : (
                 <EmptyState

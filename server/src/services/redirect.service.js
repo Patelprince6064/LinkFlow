@@ -1,7 +1,8 @@
 import Link from "../models/Link.js";
 import AppError from "../utils/AppError.js";
+import { comparePassword } from "../utils/token.js";
 
-export const resolveShortLink = async (shortCode) => {
+export const resolveShortLink = async (shortCode, passwordAttempt) => {
   if (!shortCode) {
     throw new AppError("Short code is required", 400);
   }
@@ -14,6 +15,20 @@ export const resolveShortLink = async (shortCode) => {
 
   if (!link.isActive) {
     throw new AppError("This short link has been disabled", 404);
+  }
+
+  if (link.expiresAt && new Date(link.expiresAt).getTime() < Date.now()) {
+    throw new AppError("This short link has expired", 410);
+  }
+
+  if (link.passwordHash) {
+    if (!passwordAttempt) {
+      throw new AppError("This link is password protected", 401);
+    }
+    const ok = await comparePassword(passwordAttempt, link.passwordHash);
+    if (!ok) {
+      throw new AppError("Incorrect password", 401);
+    }
   }
 
   return { linkId: link._id, destinationUrl: link.destinationUrl };

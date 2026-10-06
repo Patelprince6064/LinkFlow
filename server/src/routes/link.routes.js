@@ -21,6 +21,8 @@ router.post(
   validateBody({
     destinationUrl: { required: true, type: "string", maxLength: 2048 },
     customSlug: { type: "string", maxLength: 20 },
+    expiresAt: { type: "string" },
+    password: { type: "string", maxLength: 64 },
   }),
   linkController.createLink
 );
@@ -34,6 +36,8 @@ router.patch(
     destinationUrl: { type: "string", maxLength: 2048 },
     customSlug: { type: "string", maxLength: 20 },
     isActive: { type: "boolean" },
+    expiresAt: { type: "string" },
+    password: { type: "string", maxLength: 64 },
   }),
   linkController.updateLink
 );

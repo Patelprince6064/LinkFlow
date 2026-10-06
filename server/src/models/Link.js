@@ -46,6 +46,15 @@ const linkSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    expiresAt: {
+      type: Date,
+      default: null,
+    },
+    passwordHash: {
+      type: String,
+      default: null,
+      // Stripped in sanitizeLink — never returned to clients.
+    },
   },
   {
     timestamps: true,
@@ -53,6 +62,7 @@ const linkSchema = new mongoose.Schema(
 );
 
 linkSchema.index({ user: 1, createdAt: -1 });
+linkSchema.index({ expiresAt: 1 });
 
 const Link = mongoose.model("Link", linkSchema);
 

@@ -5,8 +5,33 @@ import { isReservedSlug } from "../utils/reservedSlugs.js";
 import { isValidDestinationUrl } from "../utils/urlValidation.js";
 import { buildShortUrl } from "../utils/shortUrl.js";
 import { sanitizeSearchInput } from "../utils/validation.js";
+import { hashPassword } from "../utils/token.js";
 
 const MAX_PAGE_LIMIT = 50;
+const LINK_PASSWORD_MIN = 4;
+const LINK_PASSWORD_MAX = 64;
+
+export const parseExpiresAt = (value) => {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new AppError("expiresAt must be a valid date", 400);
+  }
+  if (date.getTime() <= Date.now()) {
+    throw new AppError("Expiry must be in the future", 400);
+  }
+  return date;
+};
+
+export const validateLinkPassword = (password) => {
+  if (password === undefined) return undefined;
+  if (password === null || password === "") return null;
+  if (typeof password !== "string" || password.length < LINK_PASSWORD_MIN || password.length > LINK_PASSWORD_MAX) {
+    throw new AppError(`Link password must be ${LINK_PASSWORD_MIN}-${LINK_PASSWORD_MAX} characters`, 400);
+  }
+  return password;
+};
 
 const sanitizeLink = (link) => ({
   id: link._id,
@@ -15,11 +40,14 @@ const sanitizeLink = (link) => ({
   shortUrl: buildShortUrl(link.shortCode),
   clickCount: link.clickCount,
   isActive: link.isActive,
+  expiresAt: link.expiresAt || null,
+  hasPassword: Boolean(link.passwordHash),
+  isExpired: link.expiresAt ? new Date(link.expiresAt).getTime() < Date.now() : false,
   createdAt: link.createdAt,
   updatedAt: link.updatedAt,
 });
 
-export const createLink = async ({ userId, destinationUrl, customSlug }) => {
+export const createLink = async ({ userId, destinationUrl, customSlug, expiresAt, password }) => {
   if (!destinationUrl) {
     throw new AppError("Destination URL is required", 400);
   }
@@ -52,10 +80,15 @@ export const createLink = async ({ userId, destinationUrl, customSlug }) => {
     shortCode = await generateUniqueShortCode();
   }
 
+  const parsedExpiry = parseExpiresAt(expiresAt);
+  const cleanPassword = validateLinkPassword(password);
+
   const link = await Link.create({
     user: userId,
     destinationUrl,
     shortCode,
+    expiresAt: parsedExpiry ?? null,
+    passwordHash: cleanPassword ? await hashPassword(cleanPassword) : null,
   });
 
   return sanitizeLink(link);
@@ -115,7 +148,7 @@ export const getLinkById = async ({ userId, linkId }) => {
   return sanitizeLink(link);
 };
 
-export const updateLink = async ({ userId, linkId, destinationUrl, customSlug, isActive }) => {
+export const updateLink = async ({ userId, linkId, destinationUrl, customSlug, isActive, expiresAt, password }) => {
   const link = await Link.findOne({ _id: linkId, user: userId });
   if (!link) {
     throw new AppError("Link not found", 404);
@@ -150,6 +183,15 @@ export const updateLink = async ({ userId, linkId, destinationUrl, customSlug, i
 
   if (isActive !== undefined) {
     link.isActive = isActive;
+  }
+
+  if (expiresAt !== undefined) {
+    link.expiresAt = parseExpiresAt(expiresAt);
+  }
+
+  if (password !== undefined) {
+    const cleanPassword = validateLinkPassword(password);
+    link.passwordHash = cleanPassword ? await hashPassword(cleanPassword) : null;
   }
 
   await link.save();

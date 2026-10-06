@@ -6,8 +6,9 @@ import asyncHandler from "../middleware/asyncHandler.js";
 
 export const redirect = asyncHandler(async (req, res) => {
   const { shortCode } = req.params;
+  const passwordAttempt = req.query.password || req.query.p || req.headers["x-link-password"];
 
-  const { linkId, destinationUrl } = await redirectService.resolveShortLink(shortCode);
+  const { linkId, destinationUrl } = await redirectService.resolveShortLink(shortCode, passwordAttempt);
 
   res.redirect(302, destinationUrl);
 

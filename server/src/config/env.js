@@ -16,7 +16,15 @@ const env = {
   REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN || "7d",
   PUBLIC_BASE_URL: (process.env.PUBLIC_BASE_URL || "http://localhost:5000").trim(),
   RESEND_API_KEY: process.env.RESEND_API_KEY,
-  EMAIL_FROM: process.env.EMAIL_FROM,
+  EMAIL_FROM: process.env.EMAIL_FROM || "LinkHub <onboarding@resend.dev>",
+  // Cookie overrides: explicit env wins, otherwise derived from NODE_ENV.
+  // Production default: secure + SameSite=None (cross-origin Vercel -> Render).
+  // Development default: non-secure + SameSite=lax.
+  COOKIE_SECURE:
+    process.env.COOKIE_SECURE !== undefined
+      ? process.env.COOKIE_SECURE === "true"
+      : (process.env.NODE_ENV || "development") === "production",
+  COOKIE_SAME_SITE: process.env.COOKIE_SAME_SITE || ((process.env.NODE_ENV || "development") === "production" ? "none" : "lax"),
 };
 
 

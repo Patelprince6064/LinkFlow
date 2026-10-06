@@ -7,8 +7,8 @@ export const REFRESH_COOKIE = "refresh_token";
 
 const baseCookieOptions = {
   httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? "none" : "lax", // "none" required for cross-origin (Vercel → Render)
+  secure: env.COOKIE_SECURE ?? isProduction,
+  sameSite: env.COOKIE_SAME_SITE ?? (isProduction ? "none" : "lax"), // "none" required for cross-origin (Vercel → Render)
   path: "/",
 };
 
@@ -31,11 +31,11 @@ export const setRefreshCookie = (res, token) => {
 };
 
 export const clearAccessCookie = (res) => {
-  res.clearCookie(ACCESS_COOKIE, { path: "/" });
+  res.clearCookie(ACCESS_COOKIE, { ...baseCookieOptions, maxAge: undefined });
 };
 
 export const clearRefreshCookie = (res) => {
-  res.clearCookie(REFRESH_COOKIE, { path: "/" });
+  res.clearCookie(REFRESH_COOKIE, { ...baseCookieOptions, maxAge: undefined });
 };
 
 export const clearAuthCookies = (res) => {

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Bitly + Linktree Hybrid - Branded Short-Link & Bio-Link Hub",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "client": "npm run dev --prefix client",

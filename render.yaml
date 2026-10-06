@@ -6,6 +6,7 @@ services:
     rootDir: server
     buildCommand: npm install
     startCommand: node src/server.js
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
@@ -27,3 +28,7 @@ services:
         value: "true"
       - key: COOKIE_SAME_SITE
         value: none
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: LinkHub <onboarding@resend.dev>

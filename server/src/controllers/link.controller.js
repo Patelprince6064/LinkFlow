@@ -2,11 +2,13 @@ import * as linkService from "../services/link.service.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
 export const createLink = asyncHandler(async (req, res) => {
-  const { destinationUrl, customSlug } = req.body;
+  const { destinationUrl, customSlug, expiresAt, password } = req.body;
   const link = await linkService.createLink({
     userId: req.user.id,
     destinationUrl,
     customSlug,
+    expiresAt,
+    password,
   });
 
   res.status(201).json({
@@ -45,13 +47,15 @@ export const getLink = asyncHandler(async (req, res) => {
 });
 
 export const updateLink = asyncHandler(async (req, res) => {
-  const { destinationUrl, customSlug, isActive } = req.body;
+  const { destinationUrl, customSlug, isActive, expiresAt, password } = req.body;
   const link = await linkService.updateLink({
     userId: req.user.id,
     linkId: req.params.id,
     destinationUrl,
     customSlug,
     isActive,
+    expiresAt,
+    password,
   });
 
   res.status(200).json({

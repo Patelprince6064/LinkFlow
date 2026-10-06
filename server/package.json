@@ -2,6 +2,7 @@
   "name": "short-link-bio-hub-server",
   "version": "1.0.0",
   "description": "Backend API for Short-Link & Bio-Link Hub",
+  "license": "MIT",
   "type": "module",
   "main": "src/server.js",
   "scripts": {

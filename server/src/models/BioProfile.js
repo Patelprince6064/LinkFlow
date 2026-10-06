@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-const VALID_THEMES = ["Minimal Light", "Dark Slate", "Gradient"];
+const VALID_THEMES = ["Minimal Light", "Dark Slate", "Gradient", "Sunset Glow", "Ocean Night", "Mint Light"];
+export { VALID_THEMES };
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 const SAFE_URL_REGEX = /^https?:\/\/.+/;
 
@@ -35,6 +36,11 @@ const socialLinkSchema = new mongoose.Schema(
     order: {
       type: Number,
       default: 0,
+    },
+    clicks: {
+      type: Number,
+      default: 0,
+      min: [0, "Click count cannot be negative"],
     },
   },
   { _id: false }
@@ -79,7 +85,7 @@ const bioProfileSchema = new mongoose.Schema(
       required: [true, "Theme is required"],
       enum: {
         values: VALID_THEMES,
-        message: "Theme must be one of: Minimal Light, Dark Slate, Gradient",
+        message: "Theme must be one of: Minimal Light, Dark Slate, Gradient, Sunset Glow, Ocean Night, Mint Light",
       },
       default: "Minimal Light",
     },

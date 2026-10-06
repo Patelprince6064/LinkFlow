@@ -47,6 +47,42 @@ export const devices = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data });
 });
 
+export const browsers = asyncHandler(async (req, res) => {
+  const { startDate, endDate, limit } = req.query;
+  const data = await analyticsService.getBrowsers({
+    userId: req.user.id,
+    startDate,
+    endDate,
+    limit,
+  });
+
+  res.status(200).json({ success: true, data });
+});
+
+export const operatingSystems = asyncHandler(async (req, res) => {
+  const { startDate, endDate, limit } = req.query;
+  const data = await analyticsService.getOperatingSystems({
+    userId: req.user.id,
+    startDate,
+    endDate,
+    limit,
+  });
+
+  res.status(200).json({ success: true, data });
+});
+
+export const countries = asyncHandler(async (req, res) => {
+  const { startDate, endDate, limit } = req.query;
+  const data = await analyticsService.getTopCountries({
+    userId: req.user.id,
+    startDate,
+    endDate,
+    limit,
+  });
+
+  res.status(200).json({ success: true, data });
+});
+
 export const linkAnalytics = asyncHandler(async (req, res) => {
   const { startDate, endDate } = req.query;
   const data = await analyticsService.getLinkAnalytics({

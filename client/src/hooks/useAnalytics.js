@@ -51,6 +51,36 @@ export const useDeviceDistribution = ({ startDate, endDate } = {}) => {
   });
 };
 
+export const useBrowsers = ({ startDate, endDate, limit = 10 } = {}) => {
+  return useQuery({
+    queryKey: ["analytics", "browsers", { startDate, endDate, limit }],
+    queryFn: async () => {
+      const res = await api.get(`/v1/analytics/browsers?${buildParams({ startDate, endDate, limit })}`);
+      return res.data.data;
+    },
+  });
+};
+
+export const useOperatingSystems = ({ startDate, endDate, limit = 10 } = {}) => {
+  return useQuery({
+    queryKey: ["analytics", "os", { startDate, endDate, limit }],
+    queryFn: async () => {
+      const res = await api.get(`/v1/analytics/os?${buildParams({ startDate, endDate, limit })}`);
+      return res.data.data;
+    },
+  });
+};
+
+export const useTopCountries = ({ startDate, endDate, limit = 10 } = {}) => {
+  return useQuery({
+    queryKey: ["analytics", "countries", { startDate, endDate, limit }],
+    queryFn: async () => {
+      const res = await api.get(`/v1/analytics/countries?${buildParams({ startDate, endDate, limit })}`);
+      return res.data.data;
+    },
+  });
+};
+
 export const useLinkAnalytics = (linkId, { startDate, endDate } = {}) => {
   return useQuery({
     queryKey: ["analytics", "link", linkId, { startDate, endDate }],

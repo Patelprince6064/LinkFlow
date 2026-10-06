@@ -44,6 +44,10 @@ test("exports getPublicProfile function", () => {
   assert(typeof bioService.getPublicProfile === "function", "getPublicProfile should be a function");
 });
 
+test("exports recordBioLinkClick function", () => {
+  assert(typeof bioService.recordBioLinkClick === "function", "recordBioLinkClick should be a function");
+});
+
 console.log("\nBio Controller:");
 
 test("exports getMyProfile controller", () => {
@@ -64,6 +68,10 @@ test("exports deleteProfile controller", () => {
 
 test("exports getPublicProfile controller", () => {
   assert(typeof bioController.getPublicProfile === "function", "getPublicProfile should be a function");
+});
+
+test("exports recordBioLinkClick controller", () => {
+  assert(typeof bioController.recordBioLinkClick === "function", "recordBioLinkClick should be a function");
 });
 
 console.log("\nBioProfile Model:");

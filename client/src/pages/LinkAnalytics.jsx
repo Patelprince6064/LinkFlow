@@ -94,10 +94,14 @@ function LinkAnalytics() {
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-3 sm:mt-6 sm:gap-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4 lg:grid-cols-4">
         <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
           <p className="text-xs text-muted-foreground sm:text-sm">Total Clicks</p>
           <p className="mt-1 text-lg font-bold text-foreground sm:text-2xl">{data.totalClicks}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
+          <p className="text-xs text-muted-foreground sm:text-sm">Unique Visitors</p>
+          <p className="mt-1 text-lg font-bold text-foreground sm:text-2xl">{data.uniqueVisitors ?? 0}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
           <p className="text-xs text-muted-foreground sm:text-sm">Unique Referrers</p>
@@ -206,6 +210,36 @@ function LinkAnalytics() {
           )}
         </div>
       </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 lg:grid-cols-3">
+        <DimensionList title="Browsers" items={data.browsers} labelKey="browser" emptyText="Browser info appears after this link receives clicks." />
+        <DimensionList title="Operating Systems" items={data.operatingSystems} labelKey="os" emptyText="OS info appears after this link receives clicks." />
+        <DimensionList title="Countries" items={data.countries} labelKey="country" emptyText="Country appears when your host passes a geo header." />
+      </div>
+    </div>
+  );
+}
+
+function DimensionList({ title, items, labelKey, emptyText }) {
+  const list = items ?? [];
+  const total = list.reduce((sum, item) => sum + (item.clicks ?? 0), 0);
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <h2 className="text-sm font-medium text-foreground">{title}</h2>
+      {list.length > 0 ? (
+        <div className="mt-4 space-y-2">
+          {list.map((item, i) => (
+            <div key={i} className="flex items-center justify-between gap-2 text-sm">
+              <span className="min-w-0 flex-1 truncate text-foreground overflow-safe">{item[labelKey] ?? "Other"}</span>
+              <span className="ml-2 shrink-0 text-muted-foreground">
+                {item.clicks}{total > 0 ? ` (${Math.round((item.clicks / total) * 100)}%)` : ""}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState title={`No ${title.toLowerCase()} data yet`} description={emptyText} />
+      )}
     </div>
   );
 }

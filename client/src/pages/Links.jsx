@@ -129,13 +129,23 @@ function Links() {
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                          link.isActive
+                          link.isActive && !link.isExpired
                             ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                             : "bg-muted text-muted-foreground"
                         }`}
                       >
-                        {link.isActive ? "Active" : "Inactive"}
+                        {link.isExpired ? "Expired" : link.isActive ? "Active" : "Inactive"}
                       </span>
+                      {link.hasPassword && (
+                        <span className="ml-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                          Locked
+                        </span>
+                      )}
+                      {link.expiresAt && !link.isExpired && (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Expires {new Date(link.expiresAt).toLocaleDateString()}
+                        </p>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {new Date(link.createdAt).toLocaleDateString()}
@@ -233,18 +243,30 @@ function Links() {
                   </div>
                   <span
                     className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                      link.isActive
-                        ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                        : "bg-muted text-muted-foreground"
+                      link.isExpired
+                        ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                        : link.isActive
+                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                          : "bg-muted text-muted-foreground"
                     }`}
                   >
-                    {link.isActive ? "Active" : "Inactive"}
+                    {link.isExpired ? "Expired" : link.isActive ? "Active" : "Inactive"}
                   </span>
+                  {link.hasPassword && (
+                    <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                      Locked
+                    </span>
+                  )}
                 </div>
                 <div className="mt-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <span>{link.clickCount} clicks</span>
                     <span>{new Date(link.createdAt).toLocaleDateString()}</span>
+                    {link.expiresAt && (
+                      <span title={new Date(link.expiresAt).toLocaleString()}>
+                        Expires {new Date(link.expiresAt).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-1">
                     <button onClick={() => handleCopy(link.shortUrl)} className="rounded p-2 text-muted-foreground hover:bg-accent hover:text-foreground touch-target" title="Copy" aria-label="Copy short link">
@@ -362,13 +384,15 @@ function Links() {
 }
 
 function CreateLinkModal({ onClose, onSubmit, isLoading, error }) {
-  const [form, setForm] = useState({ destinationUrl: "", customSlug: "" });
+  const [form, setForm] = useState({ destinationUrl: "", customSlug: "", expiresAt: "", password: "" });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit({
       destinationUrl: form.destinationUrl,
       customSlug: form.customSlug || undefined,
+      expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : undefined,
+      password: form.password || undefined,
     });
   };
 
@@ -410,6 +434,36 @@ function CreateLinkModal({ onClose, onSubmit, isLoading, error }) {
             />
             <p className="mt-1 text-xs text-muted-foreground">3-20 characters: letters, numbers, hyphens, underscores</p>
           </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="create-expires" className="block text-sm font-medium text-foreground">
+                Expiry <span className="text-muted-foreground">(optional)</span>
+              </label>
+              <input
+                id="create-expires"
+                type="datetime-local"
+                value={form.expiresAt}
+                min={new Date().toISOString().slice(0, 16)}
+                onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
+                className="mt-1 block h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+            <div>
+              <label htmlFor="create-password" className="block text-sm font-medium text-foreground">
+                Password <span className="text-muted-foreground">(optional)</span>
+              </label>
+              <input
+                id="create-password"
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                minLength={4}
+                maxLength={64}
+                className="mt-1 block h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                placeholder="4-64 chars"
+              />
+            </div>
+          </div>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
@@ -433,19 +487,38 @@ function CreateLinkModal({ onClose, onSubmit, isLoading, error }) {
 }
 
 function EditLinkModal({ link, onClose, onSubmit, isLoading, error }) {
+  const toLocalInput = (iso) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toISOString().slice(0, 16);
+  };
+  const initialExpires = toLocalInput(link.expiresAt);
   const [form, setForm] = useState({
     destinationUrl: link.destinationUrl,
     customSlug: link.shortCode,
     isActive: link.isActive,
+    expiresAt: initialExpires,
+    password: "",
+    removePassword: false,
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({
+    const payload = {
       destinationUrl: form.destinationUrl,
       customSlug: form.customSlug,
       isActive: form.isActive,
-    });
+    };
+    if (form.expiresAt !== initialExpires) {
+      payload.expiresAt = form.expiresAt ? new Date(form.expiresAt).toISOString() : null;
+    }
+    if (form.removePassword) {
+      payload.password = null;
+    } else if (form.password) {
+      payload.password = form.password;
+    }
+    onSubmit(payload);
   };
 
   return (
@@ -489,6 +562,60 @@ function EditLinkModal({ link, onClose, onSubmit, isLoading, error }) {
               className="h-4 w-4 rounded border-input"
             />
             <label htmlFor="edit-active" className="text-sm text-foreground">Active</label>
+          </div>
+          <div>
+            <label htmlFor="edit-expires" className="block text-sm font-medium text-foreground">
+              Expiry <span className="text-muted-foreground">(optional — clear to remove)</span>
+            </label>
+            <div className="mt-1 flex gap-2">
+              <input
+                id="edit-expires"
+                type="datetime-local"
+                value={form.expiresAt}
+                min={new Date().toISOString().slice(0, 16)}
+                onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
+                className="block h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              {form.expiresAt && (
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, expiresAt: "" })}
+                  className="shrink-0 rounded-md border border-border px-3 text-sm hover:bg-accent"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            {link.isExpired && (
+              <p className="mt-1 text-xs text-red-600">This link is currently expired — set a future date to reactivate.</p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="edit-password" className="block text-sm font-medium text-foreground">
+              Password {link.hasPassword && <span className="text-amber-600">(protected)</span>}
+            </label>
+            <input
+              id="edit-password"
+              type="password"
+              value={form.password}
+              disabled={form.removePassword}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              minLength={4}
+              maxLength={64}
+              placeholder={link.hasPassword ? "Leave blank to keep" : "4-64 chars to protect"}
+              className="mt-1 block h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+            />
+            {link.hasPassword && (
+              <label className="mt-2 flex items-center gap-2 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={form.removePassword}
+                  onChange={(e) => setForm({ ...form, removePassword: e.target.checked, password: "" })}
+                  className="h-4 w-4 rounded border-input"
+                />
+                Remove password
+              </label>
+            )}
           </div>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button

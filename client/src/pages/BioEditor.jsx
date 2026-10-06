@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import { useMyBio, useCreateBio, useUpdateBio, useDeleteBio } from "../hooks/useBio";
 import { useToast } from "../contexts/ToastContext";
 import BioPreview from "../components/BioPreview";
-import { EmptyState } from "../components/common/UIComponents";
 
-const THEMES = ["Minimal Light", "Dark Slate", "Gradient"];
+const THEMES = ["Minimal Light", "Dark Slate", "Gradient", "Sunset Glow", "Ocean Night", "Mint Light"];
 
 const PLATFORMS = ["Instagram", "LinkedIn", "GitHub", "YouTube", "Twitter/X", "Website"];
 
@@ -30,6 +29,8 @@ function BioEditor() {
   const [editPlatform, setEditPlatform] = useState("Website");
   const [editUrl, setEditUrl] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [dragIndex, setDragIndex] = useState(-1);
+  const [dropIndex, setDropIndex] = useState(-1);
 
   useEffect(() => {
     if (profile) {
@@ -123,6 +124,20 @@ function BioEditor() {
       const newIndex = index + direction;
       if (newIndex < 0 || newIndex >= updated.length) return prev;
       [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      return {
+        ...prev,
+        socialLinks: updated.map((s, i) => ({ ...s, order: i })),
+      };
+    });
+  };
+
+  const reorderSocial = (from, to) => {
+    if (from === to || from < 0 || to < 0) return;
+    setForm((prev) => {
+      const updated = [...prev.socialLinks];
+      if (from >= updated.length || to >= updated.length) return prev;
+      const [moved] = updated.splice(from, 1);
+      updated.splice(to, 0, moved);
       return {
         ...prev,
         socialLinks: updated.map((s, i) => ({ ...s, order: i })),
@@ -247,7 +262,32 @@ function BioEditor() {
           <Section title="Social Links">
             <div className="space-y-2">
               {form.socialLinks.map((link, i) => (
-                <div key={i} className="rounded-md border border-border bg-background p-2">
+                <div
+                  key={`${link.platform}-${link.url}-${i}`}
+                  draggable={editingIndex !== i}
+                  onDragStart={(e) => {
+                    setDragIndex(i);
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    if (dropIndex !== i) setDropIndex(i);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    reorderSocial(dragIndex, i);
+                    setDragIndex(-1);
+                    setDropIndex(-1);
+                  }}
+                  onDragEnd={() => {
+                    setDragIndex(-1);
+                    setDropIndex(-1);
+                  }}
+                  className={`rounded-md border border-border bg-background p-2 ${
+                    dropIndex === i && dragIndex !== i ? "ring-2 ring-primary" : ""
+                  } ${dragIndex === i ? "opacity-50" : ""}`}
+                >
                   {editingIndex === i ? (
                     <div className="space-y-2">
                       <select
@@ -272,9 +312,19 @@ function BioEditor() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
+                      <span
+                        className="cursor-grab touch-none rounded p-1.5 text-muted-foreground active:cursor-grabbing"
+                        title="Drag to reorder"
+                        aria-label="Drag to reorder"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
+                      </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-foreground">{link.platform}</p>
                         <p className="truncate text-xs text-muted-foreground overflow-safe">{link.url}</p>
+                        {(link.clicks || 0) > 0 && (
+                          <p className="text-xs text-muted-foreground">{link.clicks} clicks</p>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <button onClick={() => handleMoveSocial(i, -1)} disabled={i === 0} className="rounded p-1.5 text-muted-foreground hover:bg-accent disabled:opacity-30 touch-target" aria-label="Move up">

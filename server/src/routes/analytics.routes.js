@@ -10,6 +10,9 @@ router.get("/overview", analyticsController.overview);
 router.get("/clicks-over-time", analyticsController.clicksOverTime);
 router.get("/referrers", analyticsController.referrers);
 router.get("/devices", analyticsController.devices);
+router.get("/browsers", analyticsController.browsers);
+router.get("/os", analyticsController.operatingSystems);
+router.get("/countries", analyticsController.countries);
 router.get("/links/:linkId", analyticsController.linkAnalytics);
 
 export default router;

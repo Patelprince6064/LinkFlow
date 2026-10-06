@@ -182,6 +182,18 @@ test("accepts Gradient", () => {
   assert(validateTheme("Gradient") === true, "Should accept Gradient");
 });
 
+test("accepts Sunset Glow", () => {
+  assert(validateTheme("Sunset Glow") === true, "Should accept Sunset Glow");
+});
+
+test("accepts Ocean Night", () => {
+  assert(validateTheme("Ocean Night") === true, "Should accept Ocean Night");
+});
+
+test("accepts Mint Light", () => {
+  assert(validateTheme("Mint Light") === true, "Should accept Mint Light");
+});
+
 test("rejects invalid theme", () => {
   assert(validateTheme("Neon Pink") === false, "Should reject invalid theme");
 });

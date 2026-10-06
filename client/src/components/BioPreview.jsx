@@ -56,10 +56,38 @@ const themeStyles = {
     bio: "text-white/90",
     muted: "text-white/70",
   },
+  "Sunset Glow": {
+    wrapper: "bg-gradient-to-br from-orange-500 via-rose-500 to-purple-600 text-white",
+    card: "bg-black/20 backdrop-blur-md border border-white/20",
+    link: "bg-white/20 hover:bg-white/30 text-white border border-white/25 backdrop-blur-sm",
+    social: "bg-white/20 hover:bg-white/30 text-white border border-white/25 backdrop-blur-sm",
+    name: "text-white",
+    bio: "text-white/90",
+    muted: "text-white/70",
+  },
+  "Ocean Night": {
+    wrapper: "bg-gradient-to-b from-slate-950 via-cyan-950 to-slate-900 text-white",
+    card: "bg-white/10 backdrop-blur-md border border-cyan-200/20",
+    link: "bg-cyan-400/15 hover:bg-cyan-400/25 text-cyan-50 border border-cyan-200/25",
+    social: "bg-cyan-400/15 hover:bg-cyan-400/25 text-cyan-50 border border-cyan-200/25",
+    name: "text-cyan-50",
+    bio: "text-cyan-100/80",
+    muted: "text-cyan-200/60",
+  },
+  "Mint Light": {
+    wrapper: "bg-emerald-50 text-emerald-950",
+    card: "bg-white border border-emerald-200",
+    link: "bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-200",
+    social: "bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-200",
+    name: "text-emerald-950",
+    bio: "text-emerald-700",
+    muted: "text-emerald-500",
+  },
 };
 
-function BioPreview({ profile }) {
+function BioPreview({ profile, onLinkClick }) {
   const theme = themeStyles[profile?.theme] || themeStyles["Minimal Light"];
+  const sortedLinks = [...(profile?.socialLinks || [])].sort((a, b) => a.order - b.order);
 
   return (
     <div className={`min-h-[400px] p-4 sm:min-h-[500px] sm:p-6 ${theme.wrapper}`}>
@@ -81,20 +109,22 @@ function BioPreview({ profile }) {
           {profile?.bio && <p className={`mt-2 text-sm ${theme.bio} overflow-safe`}>{profile.bio}</p>}
         </div>
 
-        {profile?.socialLinks && profile.socialLinks.length > 0 && (
+        {sortedLinks.length > 0 && (
           <div className="space-y-2">
-            {profile.socialLinks
-              .sort((a, b) => a.order - b.order)
-              .map((link, i) => (
+            {sortedLinks.map((link) => (
                 <a
-                  key={i}
+                  key={`${link.platform}-${link.url}`}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => onLinkClick?.((profile.socialLinks || []).indexOf(link))}
                   className={`flex items-center justify-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${theme.social}`}
                 >
                   <SocialIcon platform={link.platform} />
                   <span className="overflow-safe">{link.label || link.platform}</span>
+                  {(link.clicks || 0) > 0 && (
+                    <span className={`text-xs ${theme.muted}`}>{link.clicks}</span>
+                  )}
                 </a>
               ))}
           </div>

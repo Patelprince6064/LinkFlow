@@ -35,3 +35,11 @@ export const getPublicProfile = asyncHandler(async (req, res) => {
 
   res.status(200).json({ success: true, data: profile });
 });
+
+export const recordLinkClick = asyncHandler(async (req, res) => {
+  const data = await bioService.recordBioLinkClick(req.params.username, req.params.index);
+
+  res.status(200).json({ success: true, data });
+});
+
+export const recordBioLinkClick = recordLinkClick;

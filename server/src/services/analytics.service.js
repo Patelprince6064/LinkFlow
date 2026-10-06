@@ -34,12 +34,17 @@ export const getOverview = async ({ userId, startDate, endDate }) => {
   if (linkIds.length === 0) {
     const totalLinks = await Link.countDocuments({ user: userId });
     const activeLinks = await Link.countDocuments({ user: userId, isActive: true });
-    return { totalClicks: 0, totalLinks, activeLinks, topLink: null };
+    return { totalClicks: 0, uniqueVisitors: 0, totalLinks, activeLinks, topLink: null };
   }
 
-  const [clickResult, totalLinks, activeLinks, topLinkResult] = await Promise.all([
+  const [clickResult, uniqueResult, totalLinks, activeLinks, topLinkResult] = await Promise.all([
     ClickEvent.aggregate([
       { $match: { link: { $in: linkIds }, timestamp: { $gte: start, $lt: end } } },
+      { $count: "total" },
+    ]),
+    ClickEvent.aggregate([
+      { $match: { link: { $in: linkIds }, timestamp: { $gte: start, $lt: end }, ipHash: { $ne: null } } },
+      { $group: { _id: "$ipHash" } },
       { $count: "total" },
     ]),
     Link.countDocuments({ user: userId }),
@@ -63,11 +68,12 @@ export const getOverview = async ({ userId, startDate, endDate }) => {
   ]);
 
   const totalClicks = clickResult[0]?.total || 0;
+  const uniqueVisitors = uniqueResult[0]?.total || 0;
   const topLink = topLinkResult[0]
     ? { id: topLinkResult[0]._id, shortCode: topLinkResult[0].shortCode, clicks: topLinkResult[0].clicks }
     : null;
 
-  return { totalClicks, totalLinks, activeLinks, topLink };
+  return { totalClicks, uniqueVisitors, totalLinks, activeLinks, topLink };
 };
 
 export const getClicksOverTime = async ({ userId, startDate, endDate }) => {
@@ -139,6 +145,51 @@ export const getDeviceDistribution = async ({ userId, startDate, endDate }) => {
   }));
 };
 
+export const getTopCountries = async ({ userId, startDate, endDate, limit = 10 }) => {
+  const { start, end } = parseDateRange(startDate, endDate);
+  const linkIds = await getUserLinkIds(userId);
+
+  if (linkIds.length === 0) return [];
+
+  return ClickEvent.aggregate([
+    { $match: { link: { $in: linkIds }, timestamp: { $gte: start, $lt: end } } },
+    { $group: { _id: "$country", clicks: { $sum: 1 } } },
+    { $sort: { clicks: -1 } },
+    { $limit: Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50) },
+    { $project: { _id: 0, country: "$_id", clicks: 1 } },
+  ]);
+};
+
+export const getBrowsers = async ({ userId, startDate, endDate, limit = 10 }) => {
+  const { start, end } = parseDateRange(startDate, endDate);
+  const linkIds = await getUserLinkIds(userId);
+
+  if (linkIds.length === 0) return [];
+
+  return ClickEvent.aggregate([
+    { $match: { link: { $in: linkIds }, timestamp: { $gte: start, $lt: end } } },
+    { $group: { _id: "$browser", clicks: { $sum: 1 } } },
+    { $sort: { clicks: -1 } },
+    { $limit: Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50) },
+    { $project: { _id: 0, browser: "$_id", clicks: 1 } },
+  ]);
+};
+
+export const getOperatingSystems = async ({ userId, startDate, endDate, limit = 10 }) => {
+  const { start, end } = parseDateRange(startDate, endDate);
+  const linkIds = await getUserLinkIds(userId);
+
+  if (linkIds.length === 0) return [];
+
+  return ClickEvent.aggregate([
+    { $match: { link: { $in: linkIds }, timestamp: { $gte: start, $lt: end } } },
+    { $group: { _id: "$os", clicks: { $sum: 1 } } },
+    { $sort: { clicks: -1 } },
+    { $limit: Math.min(Math.max(parseInt(limit, 10) || 10, 1), 50) },
+    { $project: { _id: 0, os: "$_id", clicks: 1 } },
+  ]);
+};
+
 export const getLinkAnalytics = async ({ userId, linkId, startDate, endDate }) => {
   const link = await Link.findOne({ _id: linkId, user: userId });
   if (!link) {
@@ -147,8 +198,13 @@ export const getLinkAnalytics = async ({ userId, linkId, startDate, endDate }) =
 
   const { start, end } = parseDateRange(startDate, endDate);
 
-  const [totalClicks, clicksOverTime, referrers, devices] = await Promise.all([
+  const [totalClicks, uniqueVisitors, clicksOverTime, referrers, devices, browsers, operatingSystems, countries] = await Promise.all([
     ClickEvent.countDocuments({ link: linkId, timestamp: { $gte: start, $lt: end } }),
+    ClickEvent.aggregate([
+      { $match: { link: new mongoose.Types.ObjectId(linkId), timestamp: { $gte: start, $lt: end }, ipHash: { $ne: null } } },
+      { $group: { _id: "$ipHash" } },
+      { $count: "total" },
+    ]),
     ClickEvent.aggregate([
       { $match: { link: new mongoose.Types.ObjectId(linkId), timestamp: { $gte: start, $lt: end } } },
       { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } }, clicks: { $sum: 1 } } },
@@ -164,6 +220,24 @@ export const getLinkAnalytics = async ({ userId, linkId, startDate, endDate }) =
     ClickEvent.aggregate([
       { $match: { link: new mongoose.Types.ObjectId(linkId), timestamp: { $gte: start, $lt: end } } },
       { $group: { _id: "$deviceType", clicks: { $sum: 1 } } },
+    ]),
+    ClickEvent.aggregate([
+      { $match: { link: new mongoose.Types.ObjectId(linkId), timestamp: { $gte: start, $lt: end } } },
+      { $group: { _id: "$browser", clicks: { $sum: 1 } } },
+      { $sort: { clicks: -1 } },
+      { $project: { _id: 0, browser: "$_id", clicks: 1 } },
+    ]),
+    ClickEvent.aggregate([
+      { $match: { link: new mongoose.Types.ObjectId(linkId), timestamp: { $gte: start, $lt: end } } },
+      { $group: { _id: "$os", clicks: { $sum: 1 } } },
+      { $sort: { clicks: -1 } },
+      { $project: { _id: 0, os: "$_id", clicks: 1 } },
+    ]),
+    ClickEvent.aggregate([
+      { $match: { link: new mongoose.Types.ObjectId(linkId), timestamp: { $gte: start, $lt: end } } },
+      { $group: { _id: "$country", clicks: { $sum: 1 } } },
+      { $sort: { clicks: -1 } },
+      { $project: { _id: 0, country: "$_id", clicks: 1 } },
     ]),
   ]);
 
@@ -187,8 +261,12 @@ export const getLinkAnalytics = async ({ userId, linkId, startDate, endDate }) =
   return {
     link: { id: link._id, shortCode: link.shortCode, destinationUrl: link.destinationUrl },
     totalClicks,
+    uniqueVisitors: uniqueVisitors[0]?.total || 0,
     clicksOverTime: timeData,
     referrers,
     devices: deviceData,
+    browsers,
+    operatingSystems,
+    countries,
   };
 };

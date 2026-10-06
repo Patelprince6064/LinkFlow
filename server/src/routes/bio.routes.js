@@ -35,6 +35,8 @@ router.patch(
 
 router.delete("/", requireAuth, bioController.deleteProfile);
 
+router.post("/:username/links/:index/click", bioController.recordLinkClick);
+
 router.get("/:username", bioController.getPublicProfile);
 
 export default router;

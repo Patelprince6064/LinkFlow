@@ -1,4 +1,5 @@
 import detectDeviceType from "../utils/deviceDetector.js";
+import { detectBrowser, detectOS, detectCountry } from "../utils/clientInfo.js";
 import hashIp from "../utils/ipHash.js";
 import { generateShortCode } from "../utils/shortCode.js";
 import { MOBILE_USER_AGENTS, DESKTOP_USER_AGENTS, TABLET_USER_AGENTS } from "./helpers/fixtures.js";
@@ -62,6 +63,52 @@ test("defaults to Desktop for null user agent", () => {
 
 test("defaults to Desktop for undefined user agent", () => {
   assertEqual(detectDeviceType(undefined), "Desktop");
+});
+
+// ==========================================
+// BROWSER & OS & COUNTRY DETECTION
+// ==========================================
+console.log("\nClient Environment Detection:");
+
+test("detects Chrome browser", () => {
+  assertEqual(detectBrowser(DESKTOP_USER_AGENTS.chrome), "Chrome");
+});
+
+test("detects Firefox browser", () => {
+  assertEqual(detectBrowser(DESKTOP_USER_AGENTS.firefox), "Firefox");
+});
+
+test("defaults browser to Other for null/empty", () => {
+  assertEqual(detectBrowser(null), "Other");
+  assertEqual(detectBrowser(""), "Other");
+});
+
+test("detects Windows OS", () => {
+  assertEqual(detectOS(DESKTOP_USER_AGENTS.chrome), "Windows");
+});
+
+test("detects iOS for iPhone", () => {
+  assertEqual(detectOS(MOBILE_USER_AGENTS.iPhone), "iOS");
+});
+
+test("detects Android for Android phone", () => {
+  assertEqual(detectOS(MOBILE_USER_AGENTS.android), "Android");
+});
+
+test("defaults OS to Other for null/empty", () => {
+  assertEqual(detectOS(null), "Other");
+  assertEqual(detectOS(""), "Other");
+});
+
+test("detects Country from headers", () => {
+  const req = { get: (h) => (h === "cf-ipcountry" ? "US" : null) };
+  assertEqual(detectCountry(req), "US");
+});
+
+test("defaults Country to Unknown when missing or invalid", () => {
+  assertEqual(detectCountry({ get: () => null }), "Unknown");
+  assertEqual(detectCountry(null), "Unknown");
+  assertEqual(detectCountry({ get: () => "INVALID" }), "Unknown");
 });
 
 // ==========================================

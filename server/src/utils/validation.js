@@ -53,9 +53,10 @@ export const validatePageParams = ({ page, limit }) => {
   return { page: numPage, limit: numLimit };
 };
 
+export const VALID_THEMES = ["Minimal Light", "Dark Slate", "Gradient", "Sunset Glow", "Ocean Night", "Mint Light"];
+
 export const validateTheme = (theme) => {
-  const validThemes = ["Minimal Light", "Dark Slate", "Gradient"];
-  return validThemes.includes(theme);
+  return VALID_THEMES.includes(theme);
 };
 
 export const validateSocialLinks = (socialLinks) => {

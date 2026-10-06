@@ -1,4 +1,4 @@
-import BioProfile from "../models/BioProfile.js";
+import BioProfile, { VALID_THEMES } from "../models/BioProfile.js";
 import AppError from "../utils/AppError.js";
 
 const RESERVED_USERNAMES = [
@@ -68,11 +68,14 @@ const validateSocialLinks = (socialLinks) => {
     }
   }
 
+  // NOTE: click counts are server-owned. Client-supplied `clicks` are ignored
+  // here; updateProfile re-applies preserved counts matched by URL.
   return socialLinks.map((link, i) => ({
     platform: link.platform.trim(),
     label: link.label?.trim() || null,
     url: link.url.trim(),
     order: typeof link.order === "number" ? link.order : i,
+    clicks: 0,
   }));
 };
 
@@ -136,9 +139,8 @@ export const updateProfile = async (userId, data) => {
   }
 
   if (data.theme !== undefined) {
-    const validThemes = ["Minimal Light", "Dark Slate", "Gradient"];
-    if (!validThemes.includes(data.theme)) {
-      throw new AppError("Theme must be one of: Minimal Light, Dark Slate, Gradient", 400);
+    if (!VALID_THEMES.includes(data.theme)) {
+      throw new AppError(`Theme must be one of: ${VALID_THEMES.join(", ")}`, 400);
     }
     profile.theme = data.theme;
   }
@@ -148,7 +150,13 @@ export const updateProfile = async (userId, data) => {
   }
 
   if (data.socialLinks !== undefined) {
-    profile.socialLinks = validateSocialLinks(data.socialLinks);
+    const validated = validateSocialLinks(data.socialLinks);
+    // Preserve per-link click counts across edits, matched by URL.
+    const preserved = new Map((profile.socialLinks || []).map((s) => [s.url, s.clicks || 0]));
+    profile.socialLinks = validated.map((s) => ({
+      ...s,
+      clicks: preserved.get(s.url) || 0,
+    }));
   }
 
   await profile.save();
@@ -173,4 +181,30 @@ export const getPublicProfile = async (username) => {
     .lean();
 
   return profile;
+};
+
+/**
+ * Public, unauthenticated click counter for a bio social link.
+ * Stores only an aggregate counter — no IP, no user agent, no event rows.
+ * Covered by the existing /api/v1/bio production rate limiter.
+ */
+export const recordBioLinkClick = async (username, index) => {
+  if (!username || typeof username !== "string") {
+    throw new AppError("Username is required", 400);
+  }
+
+  const parsed = Number.parseInt(index, 10);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw new AppError("Invalid link index", 400);
+  }
+
+  const profile = await BioProfile.findOne({ username: username.toLowerCase().trim() });
+  if (!profile || !profile.socialLinks || parsed >= profile.socialLinks.length) {
+    throw new AppError("Bio link not found", 404);
+  }
+
+  profile.socialLinks[parsed].clicks = (profile.socialLinks[parsed].clicks || 0) + 1;
+  await profile.save({ validateModifiedOnly: true });
+
+  return { clicks: profile.socialLinks[parsed].clicks };
 };

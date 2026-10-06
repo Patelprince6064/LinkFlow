@@ -576,6 +576,7 @@ GET /api/v1/analytics/overview
   "success": true,
   "data": {
     "totalClicks": 1234,
+    "uniqueVisitors": 876,
     "totalLinks": 15,
     "activeLinks": 12,
     "topLink": {
@@ -682,6 +683,97 @@ GET /api/v1/analytics/devices
 
 ---
 
+### Browsers
+
+```
+GET /api/v1/analytics/browsers
+```
+
+**Authentication:** Required
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| startDate | string | 7 days ago | ISO date string |
+| endDate | string | today | ISO date string |
+| limit | number | 10 | Max results (1-50) |
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    { "browser": "Chrome", "clicks": 700 },
+    { "browser": "Safari", "clicks": 300 }
+  ]
+}
+```
+
+---
+
+### Operating Systems
+
+```
+GET /api/v1/analytics/os
+```
+
+**Authentication:** Required
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| startDate | string | 7 days ago | ISO date string |
+| endDate | string | today | ISO date string |
+| limit | number | 10 | Max results (1-50) |
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    { "os": "Windows", "clicks": 500 },
+    { "os": "Android", "clicks": 320 }
+  ]
+}
+```
+
+---
+
+### Top Countries
+
+```
+GET /api/v1/analytics/countries
+```
+
+**Authentication:** Required
+
+Country is read from hosting-provider geo headers (`cf-ipcountry`,
+`x-vercel-ip-country`, `x-country-code`) when present; otherwise `Unknown`.
+No IP geolocation is performed and raw IPs are never stored.
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| startDate | string | 7 days ago | ISO date string |
+| endDate | string | today | ISO date string |
+| limit | number | 10 | Max results (1-50) |
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    { "country": "US", "clicks": 400 },
+    { "country": "Unknown", "clicks": 150 }
+  ]
+}
+```
+
+---
+
 ### Per-Link Analytics
 
 ```
@@ -714,6 +806,7 @@ GET /api/v1/analytics/links/:linkId
       "destinationUrl": "https://example.com"
     },
     "totalClicks": 456,
+    "uniqueVisitors": 312,
     "clicksOverTime": [
       { "date": "2024-01-01", "clicks": 10 },
       { "date": "2024-01-02", "clicks": 0 }
@@ -726,6 +819,15 @@ GET /api/v1/analytics/links/:linkId
       { "deviceType": "Mobile", "clicks": 250, "percentage": 55 },
       { "deviceType": "Desktop", "clicks": 180, "percentage": 39 },
       { "deviceType": "Tablet", "clicks": 26, "percentage": 6 }
+    ],
+    "browsers": [
+      { "browser": "Chrome", "clicks": 300 }
+    ],
+    "operatingSystems": [
+      { "os": "Windows", "clicks": 220 }
+    ],
+    "countries": [
+      { "country": "US", "clicks": 180 }
     ]
   }
 }
@@ -800,7 +902,7 @@ POST /api/v1/bio
 | displayName | string | Yes | 1-80 characters |
 | bio | string | No | Max 300 characters |
 | avatar | string | No | Max 500 characters (URL) |
-| theme | string | No | One of: "Minimal Light", "Dark Slate", "Gradient" |
+| theme | string | No | One of: "Minimal Light", "Dark Slate", "Gradient", "Sunset Glow", "Ocean Night", "Mint Light" |
 | socialLinks | array | No | Max 10 items |
 
 **Allowed platforms:** Instagram, LinkedIn, GitHub, YouTube, Twitter/X, Website (free-form string)
@@ -899,16 +1001,49 @@ GET /api/v1/bio/:username
     "bio": "Software developer",
     "theme": "Minimal Light",
     "socialLinks": [
-      { "platform": "GitHub", "url": "https://github.com/johndoe", "order": 0 }
+      { "platform": "GitHub", "url": "https://github.com/johndoe", "order": 0, "clicks": 42 }
     ]
   }
 }
 ```
 
 **Note:** Only public fields are returned. No email, password, user ID, or internal data is exposed.
+Per-link `clicks` are aggregate counters (no visitor data stored).
 
 **Error Responses:**
 - `404` — Profile not found
+
+---
+
+### Record Bio Link Click
+
+```
+POST /api/v1/bio/:username/links/:index/click
+```
+
+**Authentication:** None (public). Covered by the `/api/v1/bio/*` rate limiter.
+
+Increments the aggregate click counter for one social link. Stores no IP,
+user agent, or event rows.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| username | string | Bio username |
+| index | number | Zero-based position in the stored `socialLinks` array |
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": { "clicks": 43 }
+}
+```
+
+**Error Responses:**
+- `400` — Invalid link index
+- `404` — Profile or link not found
 
 ---
 

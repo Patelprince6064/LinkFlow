@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { useAnalyticsOverview, useClicksOverTime, useTopReferrers, useDeviceDistribution } from "../hooks/useAnalytics";
+import { useAnalyticsOverview, useClicksOverTime, useTopReferrers, useDeviceDistribution, useBrowsers, useOperatingSystems, useTopCountries } from "../hooks/useAnalytics";
 import { useLinks } from "../hooks/useLinks";
 import { StatCardSkeleton, ChartSkeleton, EmptyState } from "../components/common/UIComponents";
 
@@ -33,6 +33,9 @@ function Analytics() {
   const clicksOverTime = useClicksOverTime({ startDate, endDate });
   const referrers = useTopReferrers({ startDate, endDate, limit: 8 });
   const devices = useDeviceDistribution({ startDate, endDate });
+  const browsers = useBrowsers({ startDate, endDate, limit: 6 });
+  const operatingSystems = useOperatingSystems({ startDate, endDate, limit: 6 });
+  const countries = useTopCountries({ startDate, endDate, limit: 8 });
   const linksData = useLinks({ page: 1, limit: 100 });
 
   const allLinks = useMemo(() => {
@@ -60,6 +63,9 @@ function Analytics() {
     clicksOverTime.refetch();
     referrers.refetch();
     devices.refetch();
+    browsers.refetch();
+    operatingSystems.refetch();
+    countries.refetch();
   };
 
   return (
@@ -106,7 +112,11 @@ function Analytics() {
       ) : (
         <>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-            <StatCard title="Total Clicks" value={overview.data?.totalClicks ?? 0} />
+            <StatCard
+              title="Total Clicks"
+              value={overview.data?.totalClicks ?? 0}
+              subtitle={`${overview.data?.uniqueVisitors ?? 0} unique visitors`}
+            />
             <StatCard title="Total Links" value={overview.data?.totalLinks ?? 0} />
             <StatCard title="Active Links" value={overview.data?.activeLinks ?? 0} />
             <StatCard
@@ -310,6 +320,30 @@ function Analytics() {
               )}
             </div>
           </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 lg:grid-cols-3">
+            <DimensionPanel
+              title="Browsers"
+              items={browsers.data}
+              labelKey="browser"
+              emptyTitle="No browser data yet"
+              emptyDescription="Browser info appears after your links receive clicks."
+            />
+            <DimensionPanel
+              title="Operating Systems"
+              items={operatingSystems.data}
+              labelKey="os"
+              emptyTitle="No OS data yet"
+              emptyDescription="OS info appears after your links receive clicks."
+            />
+            <DimensionPanel
+              title="Top Countries"
+              items={countries.data}
+              labelKey="country"
+              emptyTitle="No country data yet"
+              emptyDescription="Country appears when your host passes a geo header; otherwise visits show as Unknown."
+            />
+          </div>
         </>
       )}
     </div>
@@ -322,6 +356,29 @@ function StatCard({ title, value, subtitle }) {
       <p className="text-xs text-muted-foreground sm:text-sm">{title}</p>
       <p className="mt-1 text-lg font-bold text-foreground sm:text-2xl overflow-safe">{value}</p>
       {subtitle && <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>}
+    </div>
+  );
+}
+
+function DimensionPanel({ title, items, labelKey, emptyTitle, emptyDescription }) {
+  const total = (items ?? []).reduce((sum, item) => sum + (item.clicks ?? 0), 0);
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <h2 className="text-sm font-medium text-foreground">{title}</h2>
+      {items && items.length > 0 ? (
+        <div className="mt-4 space-y-2">
+          {items.map((item, i) => (
+            <div key={i} className="flex items-center justify-between gap-2 text-sm">
+              <span className="min-w-0 flex-1 truncate text-foreground overflow-safe">{item[labelKey] ?? "Other"}</span>
+              <span className="ml-2 shrink-0 text-muted-foreground">
+                {item.clicks}{total > 0 ? ` (${Math.round((item.clicks / total) * 100)}%)` : ""}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState title={emptyTitle} description={emptyDescription} />
+      )}
     </div>
   );
 }

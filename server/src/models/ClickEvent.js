@@ -30,6 +30,21 @@ const clickEventSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    browser: {
+      type: String,
+      default: "Other",
+      trim: true,
+    },
+    os: {
+      type: String,
+      default: "Other",
+      trim: true,
+    },
+    country: {
+      type: String,
+      default: "Unknown",
+      trim: true,
+    },
   },
   {
     timestamps: false,

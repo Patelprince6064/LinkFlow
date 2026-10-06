@@ -44,6 +44,18 @@ test("exports getLinkAnalytics function", () => {
   assert(typeof analyticsService.getLinkAnalytics === "function", "getLinkAnalytics should be a function");
 });
 
+test("exports getBrowsers function", () => {
+  assert(typeof analyticsService.getBrowsers === "function", "getBrowsers should be a function");
+});
+
+test("exports getOperatingSystems function", () => {
+  assert(typeof analyticsService.getOperatingSystems === "function", "getOperatingSystems should be a function");
+});
+
+test("exports getTopCountries function", () => {
+  assert(typeof analyticsService.getTopCountries === "function", "getTopCountries should be a function");
+});
+
 console.log("\nAnalytics Controller:");
 
 test("exports overview function", () => {
@@ -66,6 +78,18 @@ test("exports linkAnalytics function", () => {
   assert(typeof analyticsController.linkAnalytics === "function", "linkAnalytics should be a function");
 });
 
+test("exports browsers function", () => {
+  assert(typeof analyticsController.browsers === "function", "browsers should be a function");
+});
+
+test("exports operatingSystems function", () => {
+  assert(typeof analyticsController.operatingSystems === "function", "operatingSystems should be a function");
+});
+
+test("exports countries function", () => {
+  assert(typeof analyticsController.countries === "function", "countries should be a function");
+});
+
 console.log("\nAnalytics Routes:");
 
 test("has all expected route handlers defined", () => {
@@ -75,6 +99,9 @@ test("has all expected route handlers defined", () => {
     analyticsController.referrers,
     analyticsController.devices,
     analyticsController.linkAnalytics,
+    analyticsController.browsers,
+    analyticsController.operatingSystems,
+    analyticsController.countries,
   ];
   controllerFns.forEach((fn, i) => {
     assert(typeof fn === "function", `Controller function ${i} should be a function`);

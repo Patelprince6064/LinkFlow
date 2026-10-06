@@ -15,6 +15,12 @@ function PublicBio() {
     },
   });
 
+  const handleLinkClick = (index) => {
+    if (index < 0) return;
+    // Fire-and-forget: navigation must never wait for analytics.
+    api.post(`/v1/bio/${username}/links/${index}/click`).catch(() => {});
+  };
+
   useEffect(() => {
     if (profile?.displayName) {
       document.title = profile.displayName + " — Links";
@@ -47,7 +53,7 @@ function PublicBio() {
 
   return (
     <div className="min-h-screen">
-      <BioPreview profile={profile} />
+      <BioPreview profile={profile} onLinkClick={handleLinkClick} />
     </div>
   );
 }

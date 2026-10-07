@@ -11,15 +11,20 @@ function VerifyEmail() {
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState("");
   const [resendError, setResendError] = useState("");
+  const [resendToken, setResendToken] = useState(null);
 
   const handleResend = async (e) => {
     e.preventDefault();
     setResendLoading(true);
     setResendMessage("");
     setResendError("");
+    setResendToken(null);
     try {
       const response = await resendVerification(resendEmail);
       setResendMessage(response.message);
+      if (response.token) {
+        setResendToken(response.token);
+      }
     } catch (err) {
       setResendError(err.response?.data?.message || "Could not resend the email. Please try again.");
     } finally {
@@ -121,6 +126,25 @@ function VerifyEmail() {
               >
                 {resendLoading ? "Sending..." : "Resend verification email"}
               </button>
+
+              {resendToken && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    verifyEmail(resendToken)
+                      .then(() => {
+                        setStatus("success");
+                        setMessage("Email verified successfully! You can now log in.");
+                      })
+                      .catch((err) => {
+                        setResendError(err.response?.data?.message || "Verification failed.");
+                      });
+                  }}
+                  className="mt-2 inline-flex h-10 w-full items-center justify-center rounded-md bg-green-600 px-4 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
+                >
+                  Verify Account Now (1-Click)
+                </button>
+              )}
             </form>
 
             <Link

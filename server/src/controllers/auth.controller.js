@@ -3,22 +3,37 @@ import asyncHandler from "../middleware/asyncHandler.js";
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
-  const { user } = await authService.registerUser({ name, email, password });
+  const result = await authService.registerUser({ name, email, password });
+
+  const isRestrictedSender = (process.env.EMAIL_FROM || "").includes("resend.dev");
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  const verifyUrl = `${clientUrl}/verify-email?token=${result.verificationToken}`;
 
   res.status(201).json({
     success: true,
-    message: "Registration successful. Please verify your email.",
-    data: { user },
+    message: result.emailSent
+      ? "Registration successful. Please verify your email."
+      : "Registration successful. Please verify your email to activate your account.",
+    data: {
+      user: result.user,
+      ...((!result.emailSent || isRestrictedSender) && {
+        verifyUrl,
+        token: result.verificationToken,
+      }),
+    },
   });
 });
 
 export const resendVerification = asyncHandler(async (req, res) => {
   const { email } = req.body;
-  const { message } = await authService.resendVerification(email);
+  const result = await authService.resendVerification(email);
 
   res.status(200).json({
     success: true,
-    message,
+    message: result.message,
+    ...(result.verifyUrl && { verifyUrl: result.verifyUrl }),
+    ...(result.verificationToken && { token: result.verificationToken }),
+    ...(result.emailSent !== undefined && { emailSent: result.emailSent }),
   });
 });
 

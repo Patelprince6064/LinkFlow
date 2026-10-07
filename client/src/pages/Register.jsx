@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 function Register() {
-  const { register } = useAuth();
+  const { register, verifyEmail } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -13,16 +14,38 @@ function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registeredToken, setRegisteredToken] = useState(null);
+  const [verifying, setVerifying] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError("");
   };
 
+  const handleInstantVerify = async () => {
+    if (!registeredToken) return;
+    setVerifying(true);
+    try {
+      await verifyEmail(registeredToken);
+      navigate("/login?verified=true");
+    } catch {
+      setError("Verification failed. Please try again.");
+      setSuccess("");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setLoading(true);
+
+    if (!formData.name.trim()) {
+      setError("Name is required");
+      setLoading(false);
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -37,10 +60,13 @@ function Register() {
     }
 
     try {
-      await register(formData.name, formData.email, formData.password);
-      setSuccess(
-        "Registration successful! Check your inbox for the email verification link."
-      );
+      const res = await register(formData.name, formData.email, formData.password);
+      if (res?.data?.token) {
+        setRegisteredToken(res.data.token);
+        setSuccess("Registration successful! Click the button below to verify and activate your account.");
+      } else {
+        setSuccess("Registration successful! Check your inbox for the email verification link.");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
@@ -52,14 +78,29 @@ function Register() {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4 py-8">
         <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 text-center sm:p-6">
-          <h2 className="text-lg font-bold text-foreground">Check your email</h2>
+          <h2 className="text-lg font-bold text-foreground">
+            {registeredToken ? "Activate your account" : "Check your email"}
+          </h2>
           <p className="mt-2 text-sm text-muted-foreground overflow-safe">{success}</p>
-          <Link
-            to="/verify-email"
-            className="mt-3 inline-block text-sm font-medium text-primary hover:underline"
-          >
-            Didn&apos;t get the email? Resend the link
-          </Link>
+
+          {registeredToken ? (
+            <button
+              type="button"
+              onClick={handleInstantVerify}
+              disabled={verifying}
+              className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-md bg-green-600 px-6 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+            >
+              {verifying ? "Verifying..." : "Verify & Activate Account Now"}
+            </button>
+          ) : (
+            <Link
+              to="/verify-email"
+              className="mt-3 inline-block text-sm font-medium text-primary hover:underline"
+            >
+              Didn&apos;t get the email? Resend the link
+            </Link>
+          )}
+
           <Link
             to="/login"
             className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"

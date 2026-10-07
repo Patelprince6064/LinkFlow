@@ -101,18 +101,28 @@ export const resendVerification = async (email) => {
   user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
   await user.save({ validateModifiedOnly: true });
 
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  const verifyUrl = `${clientUrl}/verify-email?token=${verificationToken}`;
+
   // Always log token in dev for easy testing
   if (process.env.NODE_ENV !== "production") {
     console.log(`\n[EMAIL VERIFICATION] Token: ${verificationToken}`);
-    console.log(`[EMAIL VERIFICATION] URL: ${process.env.CLIENT_URL || "http://localhost:5173"}/verify-email?token=${verificationToken}\n`);
+    console.log(`[EMAIL VERIFICATION] URL: ${verifyUrl}\n`);
   }
 
-  await deliverEmail(
+  const emailSent = await deliverEmail(
     () => sendVerificationEmail({ name: user.name, email: user.email, token: verificationToken }),
     "email-verification-resend"
   );
 
-  return { message };
+  const isRestrictedSender = (process.env.EMAIL_FROM || "").includes("resend.dev");
+
+  return {
+    message,
+    verificationToken,
+    verifyUrl: (!emailSent || isRestrictedSender) ? verifyUrl : undefined,
+    emailSent,
+  };
 };
 
 export const verifyEmail = async (token) => {

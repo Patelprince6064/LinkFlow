@@ -70,13 +70,15 @@ const validateSocialLinks = (socialLinks) => {
 
   // NOTE: click counts are server-owned. Client-supplied `clicks` are ignored
   // here; updateProfile re-applies preserved counts matched by URL.
-  return socialLinks.map((link, i) => ({
-    platform: link.platform.trim(),
-    label: link.label?.trim() || null,
-    url: link.url.trim(),
-    order: typeof link.order === "number" ? link.order : i,
-    clicks: 0,
-  }));
+  return socialLinks
+    .map((link, i) => ({
+      platform: link.platform.trim(),
+      label: link.label?.trim() || null,
+      url: link.url.trim(),
+      order: typeof link.order === "number" ? link.order : i,
+      clicks: 0,
+    }))
+    .sort((a, b) => a.order - b.order);
 };
 
 export const getMyProfile = async (userId) => {
@@ -93,6 +95,10 @@ export const createProfile = async (userId, data) => {
   const usernameTaken = await BioProfile.findOne({ username });
   if (usernameTaken) {
     throw new AppError("This username is already taken", 409);
+  }
+
+  if (data.theme !== undefined && !VALID_THEMES.includes(data.theme)) {
+    throw new AppError(`Theme must be one of: ${VALID_THEMES.join(", ")}`, 400);
   }
 
   const socialLinks = validateSocialLinks(data.socialLinks);

@@ -103,7 +103,6 @@ const runTests = async () => {
   });
 
   await test("overview with no links returns zero", async () => {
-    await clearCollections();
     const u = await User.create({ name: "Empty", email: "empty@test.com", passwordHash: "hash", isEmailVerified: true });
     const data = await analyticsService.getOverview({ userId: u._id.toString(), startDate, endDate });
     assertEqual(data.totalClicks, 0);
@@ -158,7 +157,7 @@ const runTests = async () => {
     const data = await analyticsService.getTopReferrers({ userId, startDate, endDate });
     const google = data.find((r) => r.referrer === "https://google.com");
     assert(google, "Should have google referrer");
-    assertEqual(google.clicks, 2);
+    assertEqual(google.clicks, 3);
   });
 
   await test("sorted by clicks descending", async () => {

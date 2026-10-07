@@ -47,6 +47,11 @@ export const AuthProvider = ({ children }) => {
     return response.data;
   };
 
+  const resendVerification = async (email) => {
+    const response = await api.post("/v1/auth/resend-verification", { email });
+    return response.data;
+  };
+
   const login = async (email, password) => {
     const response = await api.post("/v1/auth/login", { email, password });
     setUser(response.data.data.user);
@@ -81,6 +86,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     register,
     verifyEmail,
+    resendVerification,
     login,
     logout,
     forgotPassword,

@@ -57,6 +57,7 @@ if (env.NODE_ENV === "production") {
   app.use("/api/v1/auth/login", authLimiter);
   app.use("/api/v1/auth/forgot-password", authLimiter);
   app.use("/api/v1/auth/reset-password", authLimiter);
+  app.use("/api/v1/auth/resend-verification", authLimiter);
   app.use("/api/v1/auth/refresh", authLimiter);
 
   const redirectLimiter = rateLimit({

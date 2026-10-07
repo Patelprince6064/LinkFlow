@@ -23,6 +23,7 @@ export const hashToken = (token) => {
  * a candidate token against its stored SHA-256 hash.
  */
 export const compareTokenHash = (token, storedHash) => {
+  if (!token || !storedHash) return false;
   const candidateHash = hashToken(token);
   // timingSafeEqual requires equal-length Buffers
   const a = Buffer.from(candidateHash, "hex");

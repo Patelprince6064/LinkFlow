@@ -3,10 +3,29 @@ import { useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 function VerifyEmail() {
-  const { verifyEmail } = useAuth();
+  const { verifyEmail, resendVerification } = useAuth();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("verifying");
   const [message, setMessage] = useState("");
+  const [resendEmail, setResendEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+  const [resendError, setResendError] = useState("");
+
+  const handleResend = async (e) => {
+    e.preventDefault();
+    setResendLoading(true);
+    setResendMessage("");
+    setResendError("");
+    try {
+      const response = await resendVerification(resendEmail);
+      setResendMessage(response.message);
+    } catch (err) {
+      setResendError(err.response?.data?.message || "Could not resend the email. Please try again.");
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -65,6 +84,45 @@ function VerifyEmail() {
             </div>
             <h2 className="mt-4 text-lg font-bold text-foreground">Verification Failed</h2>
             <p className="mt-2 text-sm text-muted-foreground overflow-safe">{message}</p>
+
+            <form onSubmit={handleResend} className="mt-5 space-y-3 text-left" noValidate>
+              <label htmlFor="resend-email" className="block text-sm font-medium text-foreground">
+                Didn&apos;t get the email? Enter your address to resend the link
+              </label>
+              <input
+                id="resend-email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={resendEmail}
+                onChange={(e) => {
+                  setResendEmail(e.target.value);
+                  setResendError("");
+                  setResendMessage("");
+                }}
+                className="block h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                placeholder="you@example.com"
+              />
+              {resendMessage && (
+                <p className="rounded-md border border-green-200 bg-green-50 p-2 text-xs text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300 overflow-safe">
+                  {resendMessage}
+                </p>
+              )}
+              {resendError && (
+                <p className="rounded-md border border-destructive/50 bg-destructive/10 p-2 text-xs text-destructive-foreground overflow-safe">
+                  {resendError}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={resendLoading}
+                className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {resendLoading ? "Sending..." : "Resend verification email"}
+              </button>
+            </form>
+
             <Link
               to="/login"
               className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"

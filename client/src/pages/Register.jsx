@@ -39,7 +39,7 @@ function Register() {
     try {
       await register(formData.name, formData.email, formData.password);
       setSuccess(
-        "Registration successful! Please check the server console for your email verification link."
+        "Registration successful! Check your inbox for the email verification link."
       );
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed. Please try again.");
@@ -54,6 +54,12 @@ function Register() {
         <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 text-center sm:p-6">
           <h2 className="text-lg font-bold text-foreground">Check your email</h2>
           <p className="mt-2 text-sm text-muted-foreground overflow-safe">{success}</p>
+          <Link
+            to="/verify-email"
+            className="mt-3 inline-block text-sm font-medium text-primary hover:underline"
+          >
+            Didn&apos;t get the email? Resend the link
+          </Link>
           <Link
             to="/login"
             className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"

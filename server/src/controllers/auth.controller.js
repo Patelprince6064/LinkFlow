@@ -12,6 +12,16 @@ export const register = asyncHandler(async (req, res) => {
   });
 });
 
+export const resendVerification = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const { message } = await authService.resendVerification(email);
+
+  res.status(200).json({
+    success: true,
+    message,
+  });
+});
+
 export const verifyEmail = asyncHandler(async (req, res) => {
   const { token } = req.body;
   const { user } = await authService.verifyEmail(token);

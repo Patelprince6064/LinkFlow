@@ -194,6 +194,58 @@ const runTests = async () => {
   });
 
   // ==========================================
+  // RESEND VERIFICATION TESTS
+  // ==========================================
+  console.log("\nResend Verification:");
+
+  await test("resend for unknown email returns generic message", async () => {
+    await clearCollections();
+    const { message } = await authService.resendVerification("nobody-here@example.com");
+    assert(typeof message === "string" && message.length > 0, "Should return a message");
+    assert(!message.toLowerCase().includes("not found"), "Should not reveal account existence");
+  });
+
+  await test("resend for missing email is rejected", async () => {
+    try {
+      await authService.resendVerification("");
+      throw new Error("Should have thrown");
+    } catch (e) {
+      assertEqual(e.statusCode, 400);
+    }
+  });
+
+  await test("resend for verified account does not rotate the token", async () => {
+    await clearCollections();
+    await authService.registerUser(testUser);
+    await User.findOneAndUpdate(
+      { email: testUser.email.toLowerCase() },
+      { $set: { isEmailVerified: true }, $unset: { emailVerificationTokenHash: 1, emailVerificationExpires: 1 } }
+    );
+
+    await authService.resendVerification(testUser.email);
+    const dbUser = await User.findOne({ email: testUser.email.toLowerCase() })
+      .select("+emailVerificationTokenHash +emailVerificationExpires");
+    assert(!dbUser.emailVerificationTokenHash, "Verified account should keep token cleared");
+  });
+
+  await test("resend rotates the verification token hash", async () => {
+    await clearCollections();
+    await authService.registerUser(testUser);
+    const query = { email: testUser.email.toLowerCase() };
+    const before = await User.findOne(query).select("+emailVerificationTokenHash +emailVerificationExpires");
+
+    await authService.resendVerification(testUser.email);
+
+    const after = await User.findOne(query).select("+emailVerificationTokenHash +emailVerificationExpires");
+    assert(after.emailVerificationTokenHash, "Should store a verification token hash");
+    assert(
+      after.emailVerificationTokenHash !== before.emailVerificationTokenHash,
+      "Stored hash should rotate on resend"
+    );
+    assert(after.emailVerificationExpires > new Date(), "Token should not be expired");
+  });
+
+  // ==========================================
   // LOGIN TESTS
   // ==========================================
   console.log("\nLogin:");
@@ -201,10 +253,8 @@ const runTests = async () => {
   await test("valid credentials return user and set cookies", async () => {
     await clearCollections();
     await authService.registerUser(testUser);
-    await authService.verifyEmail((await User.findOne({ email: testUser.email.toLowerCase() }))._id.toString());
 
-    // Need to manually verify since we don't have the token hash
-    // Let's directly set isEmailVerified
+    // Token hash is not exposed, so mark the account verified directly
     await User.findOneAndUpdate({ email: testUser.email.toLowerCase() }, { isEmailVerified: true });
 
     const mockRes = { cookie: () => {}, clearCookie: () => {} };
@@ -272,13 +322,9 @@ const runTests = async () => {
     await User.findOneAndUpdate({ email: testUser.email.toLowerCase() }, { isEmailVerified: true });
 
     const mockRes = { cookie: () => {}, clearCookie: () => {} };
-    await authService.loginUser(testUser, mockRes);
+    const loginResult = await authService.loginUser(testUser, mockRes);
 
-    const dbUser = await User.findOne({ email: testUser.email.toLowerCase() }).select("+refreshTokenHash");
-    const { generateRefreshToken } = await import("../utils/jwt.js");
-    const refreshToken = generateRefreshToken(dbUser, "test-jti");
-
-    const result = await authService.refreshSession(refreshToken, mockRes);
+    const result = await authService.refreshSession(loginResult.refreshToken, mockRes);
     assert(result.user, "Should return user");
   });
 
@@ -326,11 +372,8 @@ const runTests = async () => {
     await User.findOneAndUpdate({ email: testUser.email.toLowerCase() }, { isEmailVerified: true });
 
     const mockRes = { cookie: () => {}, clearCookie: () => {} };
-    await authService.loginUser(testUser, mockRes);
-
-    const dbUser = await User.findOne({ email: testUser.email.toLowerCase() }).select("+refreshTokenHash");
-    const { generateRefreshToken } = await import("../utils/jwt.js");
-    const oldRefreshToken = generateRefreshToken(dbUser, "test-jti-old");
+    const loginResult = await authService.loginUser(testUser, mockRes);
+    const oldRefreshToken = loginResult.refreshToken;
 
     // First refresh should succeed
     await authService.refreshSession(oldRefreshToken, mockRes);

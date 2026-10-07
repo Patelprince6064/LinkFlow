@@ -5,13 +5,39 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from ".
 import { setAccessCookie, setRefreshCookie, clearAuthCookies } from "../utils/cookie.js";
 import { sendVerificationEmail, sendPasswordResetEmail } from "./email.service.js";
 import crypto from "crypto";
+import logger from "../utils/logger.js";
 
 const PASSWORD_MIN_LENGTH = 8;
+
+// Email delivery must never break an otherwise successful auth flow.
+// A failed send is logged and reported, but the operation still succeeds.
+const deliverEmail = async (task, context) => {
+  try {
+    await task();
+    return true;
+  } catch (error) {
+    logger.error("email delivery failed", { context, error: error.message });
+    return false;
+  }
+};
 
 const validatePassword = (password) => {
   if (!password || password.length < PASSWORD_MIN_LENGTH) {
     throw new AppError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters`, 400);
   }
+};
+
+const validateRegistration = ({ name, email, password }) => {
+  if (!name || !name.trim()) {
+    throw new AppError("Name is required", 400);
+  }
+  if (!email) {
+    throw new AppError("Email is required", 400);
+  }
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    throw new AppError("Please provide a valid email address", 400);
+  }
+  validatePassword(password);
 };
 
 const safeUser = (user) => ({
@@ -23,7 +49,7 @@ const safeUser = (user) => ({
 });
 
 export const registerUser = async ({ name, email, password }) => {
-  validatePassword(password);
+  validateRegistration({ name, email, password });
 
   const existing = await User.findOne({ email: email.toLowerCase() });
   if (existing) {
@@ -50,9 +76,43 @@ export const registerUser = async ({ name, email, password }) => {
   }
 
   // Send real verification email
-  await sendVerificationEmail({ name: user.name, email: user.email, token: verificationToken });
+  const emailSent = await deliverEmail(
+    () => sendVerificationEmail({ name: user.name, email: user.email, token: verificationToken }),
+    "email-verification"
+  );
 
-  return { user: safeUser(user), verificationToken };
+  return { user: safeUser(user), verificationToken, emailSent };
+};
+
+export const resendVerification = async (email) => {
+  if (!email) {
+    throw new AppError("Email is required", 400);
+  }
+
+  const message = "If an account exists for this email and is not yet verified, a new verification link has been generated.";
+
+  const user = await User.findOne({ email: email.toLowerCase() });
+  if (!user || user.isEmailVerified) {
+    return { message };
+  }
+
+  const verificationToken = generateSecureToken();
+  user.emailVerificationTokenHash = hashToken(verificationToken);
+  user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  await user.save({ validateModifiedOnly: true });
+
+  // Always log token in dev for easy testing
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`\n[EMAIL VERIFICATION] Token: ${verificationToken}`);
+    console.log(`[EMAIL VERIFICATION] URL: ${process.env.CLIENT_URL || "http://localhost:5173"}/verify-email?token=${verificationToken}\n`);
+  }
+
+  await deliverEmail(
+    () => sendVerificationEmail({ name: user.name, email: user.email, token: verificationToken }),
+    "email-verification-resend"
+  );
+
+  return { message };
 };
 
 export const verifyEmail = async (token) => {
@@ -167,6 +227,10 @@ export const logoutUser = async (userId, res) => {
 };
 
 export const requestPasswordReset = async (email) => {
+  if (!email) {
+    throw new AppError("Email is required", 400);
+  }
+
   const user = await User.findOne({ email: email.toLowerCase() });
 
   if (!user) {
@@ -188,7 +252,10 @@ export const requestPasswordReset = async (email) => {
   }
 
   // Send real password reset email
-  await sendPasswordResetEmail({ name: user.name, email: user.email, token: resetToken });
+  await deliverEmail(
+    () => sendPasswordResetEmail({ name: user.name, email: user.email, token: resetToken }),
+    "password-reset"
+  );
 
   return { message: "If an account exists for this email, password reset instructions have been generated." };
 };

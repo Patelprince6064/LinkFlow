@@ -34,7 +34,7 @@ export const validateLinkPassword = (password) => {
 };
 
 const sanitizeLink = (link) => ({
-  id: link._id,
+  id: (link._id || link.id)?.toString(),
   destinationUrl: link.destinationUrl,
   shortCode: link.shortCode,
   shortUrl: buildShortUrl(link.shortCode),

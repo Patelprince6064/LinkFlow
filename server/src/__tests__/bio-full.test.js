@@ -194,7 +194,10 @@ const runTests = async () => {
   console.log("\nBio Get:");
 
   await test("getMyProfile returns profile", async () => {
-    const profile = await bioService.getMyProfile(userId);
+    await clearCollections();
+    const u = await User.create({ name: testUser.name, email: testUser.email.toLowerCase(), passwordHash: "hash", isEmailVerified: true });
+    await bioService.createProfile(u._id.toString(), testBio);
+    const profile = await bioService.getMyProfile(u._id.toString());
     assert(profile, "Should return profile");
     assertEqual(profile.username, testBio.username.toLowerCase());
   });

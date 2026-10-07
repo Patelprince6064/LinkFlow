@@ -24,6 +24,14 @@ router.post(
 );
 
 router.post(
+  "/resend-verification",
+  validateBody({
+    email: { required: true, type: "string", maxLength: 254 },
+  }),
+  authController.resendVerification
+);
+
+router.post(
   "/login",
   validateBody({
     email: { required: true, type: "string" },

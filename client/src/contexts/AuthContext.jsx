@@ -1,13 +1,35 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import api, { setTokens, clearTokens } from "../services/api";
+import { useNavigate } from "react-router-dom";
+import api, { setTokens, clearTokens, hasStoredSession } from "../services/api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const forceLogout = useCallback(() => {
+    clearTokens();
+    setUser(null);
+    setLoading(false);
+    navigate("/login", { replace: true });
+  }, [navigate]);
 
   const fetchUser = useCallback(async () => {
+    // No stored tokens and no cookies to try -> skip /me entirely so
+    // logged-out visitors don't spam 401s in the console.
+    if (!hasStoredSession()) {
+      try {
+        const response = await api.get("/v1/auth/me");
+        setUser(response.data.data.user);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     try {
       const response = await api.get("/v1/auth/me");
       setUser(response.data.data.user);
@@ -22,8 +44,10 @@ export const AuthProvider = ({ children }) => {
           const retryResponse = await api.get("/v1/auth/me");
           setUser(retryResponse.data.data.user);
         } catch {
-          clearTokens();
-          setUser(null);
+          // Session is dead (rotated secrets, revoked token, expired refresh):
+          // drop to login instead of leaving a zombie dashboard behind.
+          forceLogout();
+          return;
         }
       } else {
         setUser(null);
@@ -31,7 +55,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [forceLogout]);
 
   useEffect(() => {
     fetchUser();
@@ -66,8 +90,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.post("/v1/auth/logout");
     } finally {
-      clearTokens();
-      setUser(null);
+      forceLogout();
     }
   };
 

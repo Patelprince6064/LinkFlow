@@ -11,29 +11,48 @@ const api = axios.create({
   },
 });
 
-let inMemoryRefreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY) || null;
-let inMemoryAccessToken = sessionStorage.getItem(ACCESS_TOKEN_KEY) || null;
+let inMemoryRefreshToken = null;
+let inMemoryAccessToken = null;
+try {
+  // localStorage (not sessionStorage): survives new tabs + browser restarts,
+  // which matters because cross-origin (Vercel -> Render) third-party cookies
+  // are often blocked, so the Bearer fallback is the real session carrier.
+  inMemoryRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) || null;
+  inMemoryAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY) || null;
+} catch {
+  /* private-mode storage may throw; fall back to memory only */
+}
+
+export const hasStoredSession = () => !!(inMemoryAccessToken || inMemoryRefreshToken);
 
 export const setTokens = (accessToken, refreshToken) => {
   inMemoryAccessToken = accessToken || null;
   inMemoryRefreshToken = refreshToken || null;
-  if (accessToken) {
-    sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-  } else {
-    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-  }
-  if (refreshToken) {
-    sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-  } else {
-    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  try {
+    if (accessToken) {
+      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    } else {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+    }
+    if (refreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    } else {
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
+  } catch {
+    /* ignore storage errors */
   }
 };
 
 export const clearTokens = () => {
   inMemoryAccessToken = null;
   inMemoryRefreshToken = null;
-  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  try {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  } catch {
+    /* ignore */
+  }
 };
 
 api.interceptors.request.use((config) => {
@@ -55,8 +74,12 @@ let isRefreshing = false;
 let failedQueue = [];
 
 const processQueue = (error) => {
-  failedQueue.forEach(({ reject }) => {
-    reject(error);
+  failedQueue.forEach(({ resolve, reject, config }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(api(config));
+    }
   });
   failedQueue = [];
 };
@@ -77,10 +100,8 @@ api.interceptors.response.use(
 
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => api(originalRequest))
-          .catch((err) => Promise.reject(err));
+          failedQueue.push({ resolve, reject, config: originalRequest });
+        });
       }
 
       originalRequest._retry = true;

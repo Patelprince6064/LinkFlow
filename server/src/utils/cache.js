@@ -11,7 +11,6 @@ if (process.env.REDIS_URL) {
 }
 
 const mem = new Map();
-const MEM_TTL_MS = 60 * 1000;
 
 export const cacheGet = async (key) => {
   if (redis) {

@@ -23,7 +23,24 @@ try {
   /* private-mode storage may throw; fall back to memory only */
 }
 
-export const hasStoredSession = () => !!(inMemoryAccessToken || inMemoryRefreshToken);
+export const hasStoredSession = () => {
+  if (inMemoryAccessToken || inMemoryRefreshToken) return true;
+  try {
+    return !!(localStorage.getItem(ACCESS_TOKEN_KEY) || localStorage.getItem(REFRESH_TOKEN_KEY));
+  } catch {
+    return false;
+  }
+};
+
+// Storage-first read: another tab may have rotated tokens after this tab
+// loaded its in-memory copy, so always prefer the freshest persisted value.
+const readStoredRefreshToken = () => {
+  try {
+    return localStorage.getItem(REFRESH_TOKEN_KEY) || inMemoryRefreshToken;
+  } catch {
+    return inMemoryRefreshToken;
+  }
+};
 
 export const setTokens = (accessToken, refreshToken) => {
   inMemoryAccessToken = accessToken || null;
@@ -70,18 +87,47 @@ const SKIP_REFRESH_URLS = [
   "/v1/auth/me",
 ];
 
-let isRefreshing = false;
-let failedQueue = [];
+let refreshPromise = null;
 
-const processQueue = (error) => {
-  failedQueue.forEach(({ resolve, reject, config }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(api(config));
-    }
-  });
-  failedQueue = [];
+/**
+ * Single shared refresh for the whole tab. Concurrent 401s (boot-time /me +
+ * React Query fetches, StrictMode double-effects) previously each fired their
+ * own POST /refresh with the same token — the losers hit the server AFTER
+ * rotation and got flagged as token reuse, permanently killing the session.
+ * Now every concurrent caller awaits the same in-flight request.
+ */
+export const refreshTokens = () => {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      const attempted = readStoredRefreshToken();
+      try {
+        const res = await api.post("/v1/auth/refresh", attempted ? { refreshToken: attempted } : {});
+        const { accessToken, refreshToken } = res.data?.data || {};
+        if (accessToken || refreshToken) {
+          setTokens(accessToken, refreshToken);
+        }
+        return res;
+      } catch (err) {
+        if (err.response?.status === 401) {
+          // Another tab may have won a cross-tab rotation race after we read
+          // our token: retry once with whatever is freshest in storage now.
+          const latest = readStoredRefreshToken();
+          if (latest && latest !== attempted) {
+            const retry = await api.post("/v1/auth/refresh", { refreshToken: latest });
+            const { accessToken, refreshToken } = retry.data?.data || {};
+            if (accessToken || refreshToken) {
+              setTokens(accessToken, refreshToken);
+            }
+            return retry;
+          }
+        }
+        throw err;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+  }
+  return refreshPromise;
 };
 
 api.interceptors.response.use(
@@ -98,38 +144,14 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject, config: originalRequest });
-        });
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
 
       try {
-        const refreshPayload = inMemoryRefreshToken
-          ? { refreshToken: inMemoryRefreshToken }
-          : {};
-        const refreshResponse = await api.post(
-          "/v1/auth/refresh",
-          refreshPayload
-        );
-
-        const newAccessToken = refreshResponse.data?.data?.accessToken;
-        const newRefreshToken = refreshResponse.data?.data?.refreshToken;
-        if (newAccessToken || newRefreshToken) {
-          setTokens(newAccessToken, newRefreshToken);
-        }
-
-        processQueue(null);
+        await refreshTokens();
         return api(originalRequest);
       } catch (refreshError) {
         clearTokens();
-        processQueue(refreshError);
         return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
 

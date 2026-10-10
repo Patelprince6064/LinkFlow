@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import api, { setTokens, clearTokens, hasStoredSession } from "../services/api";
+import api, { setTokens, hasStoredSession, refreshTokens } from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -36,11 +36,9 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       if (err.response?.status === 401) {
         try {
-          const refreshResponse = await api.post("/v1/auth/refresh");
-          const { accessToken, refreshToken } = refreshResponse.data.data || {};
-          if (accessToken || refreshToken) {
-            setTokens(accessToken, refreshToken);
-          }
+          // Shared deduped refresh: concurrent queries awaiting the same
+          // rotation all receive the fresh pair instead of racing.
+          await refreshTokens();
           const retryResponse = await api.get("/v1/auth/me");
           setUser(retryResponse.data.data.user);
         } catch {

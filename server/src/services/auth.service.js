@@ -208,9 +208,11 @@ export const refreshSession = async (token, res) => {
 
   const isValidRefresh = compareTokenHash(token, user.refreshTokenHash);
   if (!isValidRefresh) {
-    user.refreshTokenHash = undefined;
-    await user.save({ validateModifiedOnly: true });
-    clearAuthCookies(res);
+    // Valid signature but stale hash: almost always a rotation race (two
+    // concurrent refreshes, or two tabs), NOT an attack. Do NOT wipe the
+    // stored hash or cookies — that turns a harmless race into a permanent
+    // forced logout. The current hash stays valid so a retry with the fresh
+    // token succeeds.
     throw new AppError("Refresh token has been revoked", 401);
   }
 

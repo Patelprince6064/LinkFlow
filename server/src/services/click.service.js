@@ -1,5 +1,6 @@
 import ClickEvent from "../models/ClickEvent.js";
 import Link from "../models/Link.js";
+import logger from "../utils/logger.js";
 
 export const recordClick = async ({ linkId, referrer, deviceType, ipHash, browser, os, country }) => {
   try {
@@ -15,6 +16,6 @@ export const recordClick = async ({ linkId, referrer, deviceType, ipHash, browse
 
     await Link.findByIdAndUpdate(linkId, { $inc: { clickCount: 1 } });
   } catch (error) {
-    console.error(`[TELEMETRY] Failed to record click for link ${linkId}:`, error.message);
+    logger.error("[TELEMETRY] Failed to record click", { linkId: String(linkId), error: error.message });
   }
 };

@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import env from "../config/env.js";
+import logger from "../utils/logger.js";
 
 const resend = new Resend(env.RESEND_API_KEY);
 
@@ -94,12 +95,12 @@ const passwordResetTemplate = (name, resetUrl) =>
 
 const sendEmail = async ({ to, subject, html }) => {
   if (!env.RESEND_API_KEY) {
-    console.warn("[EMAIL] RESEND_API_KEY not set — skipping email send.");
+    logger.warn("[EMAIL] RESEND_API_KEY not set — skipping email send.");
     return;
   }
   const { error } = await resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
   if (error) {
-    console.error("[EMAIL] Failed to send email:", error);
+    logger.error("[EMAIL] Failed to send email", { error: error.message });
     throw new Error(`Email send failed: ${error.message}`);
   }
 };

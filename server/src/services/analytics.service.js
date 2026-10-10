@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Link from "../models/Link.js";
 import ClickEvent from "../models/ClickEvent.js";
+import BioProfile from "../models/BioProfile.js";
 import AppError from "../utils/AppError.js";
 
 const MAX_DATE_RANGE_DAYS = 90;
@@ -269,4 +270,14 @@ export const getLinkAnalytics = async ({ userId, linkId, startDate, endDate }) =
     operatingSystems,
     countries,
   };
+};
+
+export const getBioAnalytics = async ({ userId }) => {
+  const profile = await BioProfile.findOne({ user: userId }).lean();
+  if (!profile) return { totalBioClicks: 0, links: [] };
+  const links = (profile.socialLinks || [])
+    .slice()
+    .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
+    .map((s) => ({ platform: s.platform, label: s.label, url: s.url, clicks: s.clicks || 0 }));
+  return { totalBioClicks: links.reduce((sum, s) => sum + s.clicks, 0), links };
 };

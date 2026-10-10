@@ -1,4 +1,7 @@
 import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -11,6 +14,7 @@ import linkRoutes from "./routes/link.routes.js";
 import redirectRoutes from "./routes/redirect.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 import bioRoutes from "./routes/bio.routes.js";
+import apiKeyRoutes from "./routes/apikey.routes.js";
 import notFound from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
 
@@ -27,7 +31,7 @@ app.use(
     origin: env.CLIENT_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
   })
 );
 
@@ -84,7 +88,18 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/links", linkRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/bio", bioRoutes);
+app.use("/api/v1/api-keys", apiKeyRoutes);
 app.use("/r", redirectRoutes);
+
+// OpenAPI JSON (serves checked-in spec; null when missing in some deploys)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+app.get("/api/openapi.json", (_req, res) => {
+  const specPath = path.join(__dirname, "docs", "openapi.json");
+  if (!fs.existsSync(specPath)) {
+    return res.status(404).json({ success: false, message: "OpenAPI spec not found" });
+  }
+  res.type("application/json").send(fs.readFileSync(specPath, "utf8"));
+});
 
 app.use(notFound);
 app.use(errorHandler);

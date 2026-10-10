@@ -13,6 +13,7 @@ router.get("/devices", analyticsController.devices);
 router.get("/browsers", analyticsController.browsers);
 router.get("/os", analyticsController.operatingSystems);
 router.get("/countries", analyticsController.countries);
+router.get("/bio", analyticsController.bioAnalytics);
 router.get("/links/:linkId", analyticsController.linkAnalytics);
 
 export default router;

@@ -4,6 +4,7 @@ import { useLinks, useCreateLink, useUpdateLink, useDeleteLink } from "../hooks/
 import { useToast } from "../contexts/ToastContext";
 import { EmptyState } from "../components/common/UIComponents";
 import QRCodeModal from "../components/QRCodeModal";
+import { exportQRCodesBulk } from "../utils/qrBulkExport";
 
 function Links() {
   const [page, setPage] = useState(1);
@@ -46,12 +47,22 @@ function Links() {
     <div className="pb-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-bold text-foreground sm:text-2xl">Links</h1>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          Create link
-        </button>
+        <div className="flex gap-2">
+          {links.length > 0 && (
+            <button
+              onClick={() => exportQRCodesBulk(links).then(() => toast.success(`Exported ${links.length} QR codes`)).catch(() => toast.error("Bulk export failed"))}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium hover:bg-accent transition-colors"
+            >
+              Export QRs
+            </button>
+          )}
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Create link
+          </button>
+        </div>
       </div>
 
       <div className="mt-4">

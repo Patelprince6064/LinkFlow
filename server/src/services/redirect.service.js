@@ -1,13 +1,21 @@
 import Link from "../models/Link.js";
 import AppError from "../utils/AppError.js";
 import { comparePassword } from "../utils/token.js";
+import { cacheGet, cacheSet } from "../utils/cache.js";
 
 export const resolveShortLink = async (shortCode, passwordAttempt) => {
   if (!shortCode) {
     throw new AppError("Short code is required", 400);
   }
 
-  const link = await Link.findOne({ shortCode });
+  const cacheKey = `redirect:${shortCode}`;
+  let link = await cacheGet(cacheKey);
+  if (!link) {
+    link = await Link.findOne({ shortCode }).lean();
+    if (link) {
+      await cacheSet(cacheKey, link, 60);
+    }
+  }
 
   if (!link) {
     throw new AppError("Short link not found", 404);

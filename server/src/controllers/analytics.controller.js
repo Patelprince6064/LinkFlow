@@ -94,3 +94,8 @@ export const linkAnalytics = asyncHandler(async (req, res) => {
 
   res.status(200).json({ success: true, data });
 });
+
+export const bioAnalytics = asyncHandler(async (req, res) => {
+  const data = await analyticsService.getBioAnalytics({ userId: req.user.id });
+  res.status(200).json({ success: true, data });
+});

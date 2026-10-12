@@ -10,7 +10,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 console.log("Connecting to MongoDB...");
 
 await mongoose.connect(MONGODB_URI);
-console.log("✅ Connected!");
+console.log("mongo Connected!");
 
 const db = mongoose.connection.db;
 const users = db.collection("users");

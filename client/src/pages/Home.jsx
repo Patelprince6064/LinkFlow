@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { TextReveal } from "@/components/unlumen-ui/primitives/text-reveal";
 import {
   Link2,
   BarChart3,
@@ -132,21 +133,33 @@ function Home() {
               QR codes + bio pages are live
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
-            <h1
-              className="animate-fade-up mt-6 text-4xl font-bold tracking-tight text-balance text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.05]"
-              style={{ animationDelay: "90ms" }}
-            >
-              Short links. Powerful analytics.
-              <span className="block text-muted-foreground">One beautiful bio.</span>
-            </h1>
-            <p
-              className="animate-fade-up mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg"
-              style={{ animationDelay: "180ms" }}
-            >
-              LinkHub combines a Bitly-style shortener with a Linktree-style bio
-              builder — branded URLs, QR codes, and per-link engagement analytics
-              in a single dashboard.
-            </p>
+            <TextReveal
+              text="Short links. Powerful analytics."
+              as="h1"
+              splitBy="words"
+              staggerDelay={0.06}
+              duration={0.55}
+              once
+              className="mt-6 text-4xl font-bold tracking-tight text-balance text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.05]"
+            />
+            <TextReveal
+              text="One beautiful bio."
+              as="span"
+              splitBy="words"
+              staggerDelay={0.08}
+              duration={0.55}
+              once
+              className="block text-muted-foreground text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl lg:leading-[1.05]"
+            />
+            <TextReveal
+              text="LinkHub combines a Bitly-style shortener with a Linktree-style bio builder — branded URLs, QR codes, and per-link engagement analytics in a single dashboard."
+              as="p"
+              splitBy="words"
+              staggerDelay={0.02}
+              duration={0.45}
+              once
+              className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg"
+            />
             <div
               className="animate-fade-up mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
               style={{ animationDelay: "260ms" }}
@@ -328,9 +341,15 @@ function Home() {
             <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
               Everything in one hub
             </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
-              Built for sharing, tuned for insight
-            </h2>
+            <TextReveal
+              text="Built for sharing, tuned for insight"
+              as="h2"
+              splitBy="words"
+              staggerDelay={0.05}
+              duration={0.5}
+              once
+              className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl"
+            />
             <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
               One authenticated platform for links, QR, bio, and analytics — with
               ownership-scoped data and privacy-friendly tracking.
@@ -359,9 +378,15 @@ function Home() {
             <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
               How it works
             </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
-              From long URL to insight in seconds
-            </h2>
+            <TextReveal
+              text="From long URL to insight in seconds"
+              as="h2"
+              splitBy="words"
+              staggerDelay={0.05}
+              duration={0.5}
+              once
+              className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl"
+            />
           </Reveal>
           <div className="mt-10 grid gap-4 sm:gap-6 lg:grid-cols-3">
             {steps.map((s, i) => (
@@ -389,9 +414,15 @@ function Home() {
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">
                 <MousePointerClick className="h-3.5 w-3.5" /> Analytics
               </div>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Know exactly what&apos;s working
-              </h2>
+              <TextReveal
+                text="Know exactly what's working"
+                as="h2"
+                splitBy="words"
+                staggerDelay={0.05}
+                duration={0.5}
+                once
+                className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+              />
               <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
                 Every redirect records a click event with referrer, device, and a
                 hashed IP — then aggregates into overview, timeline, and top-source
@@ -470,9 +501,15 @@ function Home() {
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">
                 <Palette className="h-3.5 w-3.5" /> Link-in-bio
               </div>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                One link for everything you make
-              </h2>
+              <TextReveal
+                text="One link for everything you make"
+                as="h2"
+                splitBy="words"
+                staggerDelay={0.05}
+                duration={0.5}
+                once
+                className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+              />
               <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
                 Claim a unique username, add up to 10 social links, pick from three
                 themes, and preview live as you edit. Public pages need no login.

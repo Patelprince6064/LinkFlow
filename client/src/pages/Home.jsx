@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TextReveal } from "@/components/unlumen-ui/primitives/text-reveal";
 import { OrbitingShowcase } from "@/components/OrbitingShowcase";
+import { CountUpStats } from "@/components/CountUpStats";
 import {
   Link2,
   BarChart3,
@@ -331,6 +332,11 @@ function Home() {
             <p className="mt-2 text-sm text-muted-foreground">
               Short links, QR codes, bio pages, and analytics — without juggling three tools.
             </p>
+          </Reveal>
+
+          {/* Live stats */}
+          <Reveal delay={120} className="mx-auto mt-10 max-w-4xl">
+            <CountUpStats duration={2} separator="," digitEffect="slide" />
           </Reveal>
         </div>
       </section>

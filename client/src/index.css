@@ -322,6 +322,24 @@
   animation: orbit-spin-reverse linear infinite;
 }
 
+/* ---------- CountUp digit effects ---------- */
+@keyframes digit-slide-in {
+  from { transform: translateY(45%); opacity: 0; filter: blur(2px); }
+  to { transform: translateY(0); opacity: 1; filter: blur(0); }
+}
+@keyframes digit-blur-in {
+  from { opacity: 0; filter: blur(4px); }
+  to { opacity: 1; filter: blur(0); }
+}
+.digit-slide {
+  animation: digit-slide-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+.digit-blur {
+  animation: digit-blur-in 0.28s ease;
+  will-change: opacity;
+}
+
 /* ---------- Landing page motion (white-theme safe) ---------- */
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(18px); }
@@ -403,7 +421,8 @@
   html { scroll-behavior: auto; }
   .animate-fade-up, .animate-float, .animate-float-slow,
   .animate-marquee, .bar-grow, .pulse-dot,
-  .orbit-spin, .orbit-spin-reverse {
+  .orbit-spin, .orbit-spin-reverse,
+  .digit-slide, .digit-blur {
     animation: none !important;
   }
   .animate-fade-up { opacity: 1; }

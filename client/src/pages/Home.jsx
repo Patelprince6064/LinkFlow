@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TextReveal } from "@/components/unlumen-ui/primitives/text-reveal";
+import { OrbitingShowcase } from "@/components/OrbitingShowcase";
 import {
   Link2,
   BarChart3,
@@ -403,6 +404,33 @@ function Home() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ---------- ORBIT / ECOSYSTEM ---------- */}
+      <section className="border-t border-border bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              One hub, everything connected
+            </p>
+            <TextReveal
+              text="Your links at the center of it all"
+              as="h2"
+              splitBy="words"
+              staggerDelay={0.05}
+              duration={0.5}
+              once
+              className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl"
+            />
+            <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
+              Short links, QR codes, bio pages, and analytics — orbiting your brand.
+              Hover to tilt, built with zero animation deps.
+            </p>
+          </Reveal>
+          <Reveal delay={120} className="mt-10">
+            <OrbitingShowcase radius={96} duration={18} showPath followCursor />
+          </Reveal>
         </div>
       </section>
 

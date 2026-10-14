@@ -304,6 +304,24 @@
   }
 }
 
+/* ---------- Orbiting skills ---------- */
+@keyframes orbit-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes orbit-spin-reverse {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.orbit-spin {
+  animation: orbit-spin linear infinite;
+  transform-style: preserve-3d;
+}
+.orbit-spin-reverse {
+  animation: orbit-spin-reverse linear infinite;
+}
+
 /* ---------- Landing page motion (white-theme safe) ---------- */
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(18px); }
@@ -384,7 +402,8 @@
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .animate-fade-up, .animate-float, .animate-float-slow,
-  .animate-marquee, .bar-grow, .pulse-dot {
+  .animate-marquee, .bar-grow, .pulse-dot,
+  .orbit-spin, .orbit-spin-reverse {
     animation: none !important;
   }
   .animate-fade-up { opacity: 1; }

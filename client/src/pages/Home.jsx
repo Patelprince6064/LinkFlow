@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TextReveal } from "@/components/unlumen-ui/primitives/text-reveal";
-import { OrbitingShowcase } from "@/components/OrbitingShowcase";
+import { GlobeDemo } from "@/components/GlobeDemo";
 import { CountUpStats } from "@/components/CountUpStats";
 import {
   Link2,
@@ -413,12 +413,12 @@ function Home() {
         </div>
       </section>
 
-      {/* ---------- ORBIT / ECOSYSTEM ---------- */}
+      {/* ---------- GLOBE / WORLDWIDE ---------- */}
       <section className="border-t border-border bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
           <Reveal className="mx-auto max-w-2xl text-center">
             <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-              One hub, everything connected
+              One hub, worldwide reach
             </p>
             <TextReveal
               text="Your links at the center of it all"
@@ -430,12 +430,12 @@ function Home() {
               className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl"
             />
             <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-              Short links, QR codes, bio pages, and analytics — orbiting your brand.
-              Hover to tilt, built with zero animation deps.
+              Short links, QR codes, bio pages, and analytics — traveling the globe with
+              your brand. Drag the globe to explore.
             </p>
           </Reveal>
-          <Reveal delay={120} className="mt-10">
-            <OrbitingShowcase radius={96} duration={18} showPath followCursor />
+          <Reveal delay={120} className="mt-4">
+            <GlobeDemo />
           </Reveal>
         </div>
       </section>

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TextReveal } from "@/components/unlumen-ui/primitives/text-reveal";
 import { GlobeDemo } from "@/components/GlobeDemo";
+import { AnimatedTestimonialsDemo } from "@/components/AnimatedTestimonialsDemo";
 import { TypewriterEffectSmoothDemo } from "@/components/TypewriterCta";
 import { CountUpStats } from "@/components/CountUpStats";
 import {
@@ -577,45 +578,9 @@ function Home() {
               Short links for campaigns, QR for offline, bio for profile — one login.
             </p>
           </Reveal>
-          <div className="mt-10 grid gap-4 sm:gap-6 lg:grid-cols-3">
-            {[
-              {
-                quote:
-                  "Replaced two tools on day one. Vanity slugs for launches + the bio page for my profile — analytics tells me what to post next.",
-                name: "Maya R.",
-                role: "Newsletter creator",
-              },
-              {
-                quote:
-                  "QR codes that just track as clicks is such a small thing that saves so much time at events. Print, scan, done.",
-                name: "Devon K.",
-                role: "Indie maker",
-              },
-              {
-                quote:
-                  "The per-link analytics are refreshingly simple. Timeline, referrers, devices — exactly what I need, nothing I don't.",
-                name: "Sofia L.",
-                role: "Social media manager",
-              },
-            ].map((t, i) => (
-              <Reveal key={t.name} delay={i * 110}>
-                <figure className="card-lift h-full rounded-xl border border-border bg-card p-5 sm:p-6">
-                  <div className="flex gap-1">
-                    {Array.from({ length: 5 }).map((_, s) => (
-                      <Star key={s} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <blockquote className="mt-3 text-sm leading-6 text-foreground">
-                    &ldquo;{t.quote}&rdquo;
-                  </blockquote>
-                  <figcaption className="mt-4 text-sm">
-                    <span className="font-semibold text-foreground">{t.name}</span>
-                    <span className="text-muted-foreground"> · {t.role}</span>
-                  </figcaption>
-                </figure>
-              </Reveal>
-            ))}
-          </div>
+          <Reveal delay={120} className="mt-10">
+            <AnimatedTestimonialsDemo />
+          </Reveal>
         </div>
       </section>
 

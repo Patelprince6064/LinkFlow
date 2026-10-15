@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TextReveal } from "@/components/unlumen-ui/primitives/text-reveal";
 import { GlobeDemo } from "@/components/GlobeDemo";
+import { TypewriterEffectSmoothDemo } from "@/components/TypewriterCta";
 import { CountUpStats } from "@/components/CountUpStats";
 import {
   Link2,
@@ -635,27 +636,7 @@ function Home() {
                 aria-hidden
                 className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_80%_at_50%_0%,rgba(255,255,255,0.15),transparent)]"
               />
-              <h2 className="relative text-2xl font-bold tracking-tight text-primary-foreground sm:text-3xl lg:text-4xl">
-                Claim your short links today
-              </h2>
-              <p className="relative mx-auto mt-3 max-w-xl text-sm text-primary-foreground/80 sm:text-base">
-                Register, verify your email, and create your first branded link and bio
-                page in under two minutes.
-              </p>
-              <div className="relative mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Link
-                  to="/register"
-                  className="btn-arrow inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-background px-7 text-sm font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg sm:w-auto"
-                >
-                  Get started for free <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  to="/login"
-                  className="inline-flex h-12 w-full items-center justify-center rounded-lg border border-primary-foreground/25 px-7 text-sm font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:bg-primary-foreground/10 sm:w-auto"
-                >
-                  Log in
-                </Link>
-              </div>
+              <TypewriterEffectSmoothDemo />
             </div>
           </Reveal>
         </div>

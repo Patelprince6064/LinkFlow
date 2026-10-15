@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { TextReveal } from "@/components/unlumen-ui/primitives/text-reveal";
 import { GlobeDemo } from "@/components/GlobeDemo";
 import { AnimatedTestimonialsDemo } from "@/components/AnimatedTestimonialsDemo";
+import { MarqueeReviews } from "@/components/MarqueeReviews";
 import { TypewriterEffectSmoothDemo } from "@/components/TypewriterCta";
 import { CountUpStats } from "@/components/CountUpStats";
 import {
@@ -580,6 +581,9 @@ function Home() {
           </Reveal>
           <Reveal delay={120} className="mt-10">
             <AnimatedTestimonialsDemo />
+          </Reveal>
+          <Reveal delay={160} className="mt-10">
+            <MarqueeReviews />
           </Reveal>
         </div>
       </section>

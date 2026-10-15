@@ -361,6 +361,14 @@
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--gap))); }
+}
+@keyframes marquee-vertical {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - var(--gap))); }
+}
 @keyframes pulse-dot {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.5); opacity: 0.55; }
@@ -374,6 +382,9 @@
 .animate-float-slow { animation: float-slow 9s ease-in-out infinite; }
 .animate-marquee { animation: marquee-x 30s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
+/* Magic UI marquee primitive (repeat-segment aware) */
+.animate-marquee-magic { animation: marquee var(--duration, 30s) linear infinite; }
+.animate-marquee-vertical { animation: marquee-vertical var(--duration, 30s) linear infinite; }
 
 .reveal {
   opacity: 0;
@@ -445,7 +456,7 @@
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .animate-fade-up, .animate-float, .animate-float-slow,
-  .animate-marquee, .bar-grow, .pulse-dot,
+  .animate-marquee, .animate-marquee-magic, .animate-marquee-vertical, .bar-grow, .pulse-dot,
   .orbit-spin, .orbit-spin-reverse,
   .digit-slide, .digit-blur {
     animation: none !important;
